@@ -1,0 +1,21 @@
+{
+  "short_name": "LingoQuest",
+  "name": "LingoQuest Pro: Legacy",
+  "description": "Domina o inglês com IA e competição global. Homenagem ao projeto original.",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3892/3892250.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "./lingoquest_global_pro.html",
+  "background_color": "#F8FAFC",
+  "display": "standalone",
+  "scope": "./",
+  "theme_color": "#0284C7",
+  "orientation": "portrait",
+  "lang": "pt-PT",
+  "dir": "ltr"
+}
