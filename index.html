@@ -1,10 +1,12 @@
+<!-- Chosen Palette: Dynamic (Blue, Emerald, Rose, Slate) -->
+<!-- Versão Final Pronta para Produção com Termos de Serviço Integrados -->
 
 <!DOCTYPE html>
 <html lang="pt">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LingoQuest Pro: Legacy - Ultimate Edition</title>
+    <title>LingoQuest Pro: Legacy - Official Edition</title>
     
     <!-- PWA Essentials -->
     <link rel="manifest" href="./manifest.json">
@@ -12,69 +14,12 @@
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3892/3892250.png">
 
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    <!-- Firebase SDKs -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signInAnonymously, signInWithCustomToken, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, onSnapshot, collection, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        const firebaseConfig = JSON.parse(window.__firebase_config || '{}');
-        const appId = typeof window.__app_id !== 'undefined' ? window.__app_id : 'lingoquest-legacy-pro';
-        const authToken = typeof window.__initial_auth_token !== 'undefined' ? window.__initial_auth_token : null;
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const googleProvider = new GoogleAuthProvider();
-
-        window.db = db;
-        window.auth = auth;
-        window.appId = appId;
-        window.googleProvider = googleProvider;
-        window.signInWithPopup = signInWithPopup;
-        window.signInAnonymously = signInAnonymously;
-        window.signInWithCustomToken = signInWithCustomToken;
-        window.signOut = signOut;
-        window.collection = collection;
-
-        const initAuth = async () => {
-            try {
-                if (authToken) {
-                    await signInWithCustomToken(auth, authToken);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (error) {
-                console.error("Erro na autenticação:", error);
-            }
-        };
-        initAuth();
-
-        // Register Service Worker for PWA
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./service-worker.js')
-                    .then(reg => console.log('SW registrado!', reg))
-                    .catch(err => console.log('Erro no SW', err));
-            });
-        }
-    </script>
-
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
         
-        :root {
-            --primary: #0284C7;
-            --primary-light: #E0F2FE;
-        }
-
-        body { 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            min-height: 100vh;
-            transition: all 0.3s ease; 
-        }
+        :root { --primary: #0284C7; --primary-light: #E0F2FE; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh; transition: all 0.3s ease; }
         
         .theme-blue { --primary: #0284C7; --primary-light: #E0F2FE; }
         .theme-emerald { --primary: #059669; --primary-light: #D1FAE5; }
@@ -84,95 +29,110 @@
         .bg-style-default { background-color: #F8FAFC; color: #1E293B; }
         .bg-style-cream { background-color: #FFFBEB; color: #451a03; }
         .bg-style-dark { background-color: #0F172A; color: #F8FAFC; }
-        .bg-style-gradient-sky { background: linear-gradient(135deg, #E0F2FE 0%, #F8FAFC 100%); color: #1E293B; }
-        .bg-style-gradient-sunset { background: linear-gradient(135deg, #FFE4E6 0%, #FFFBEB 100%); color: #451a03; }
-
-        .text-primary { color: var(--primary); }
-        .bg-primary { background-color: var(--primary); }
-        .bg-primary-light { background-color: var(--primary-light); }
-        .border-primary { border-color: var(--primary); }
 
         .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
         .bg-style-dark .glass { background: rgba(30, 41, 59, 0.85); border: 1px solid rgba(255, 255, 255, 0.05); }
-        .bg-style-dark header, .bg-style-dark nav { background: rgba(15, 23, 42, 0.95); border-color: #1e293b; }
+        .bg-style-dark header, .bg-style-dark nav { background: #0F172A; border-color: #1e293b; }
         .bg-style-dark .bg-white { background-color: #1e293b; color: #f1f5f9; border-color: #334155; }
         
         .nav-active { color: var(--primary); transform: translateY(-4px); }
+        .card-inner { position: relative; width: 100%; height: 320px; transition: transform 0.6s; transform-style: preserve-3d; cursor: pointer; }
+        .card-inner.is-flipped { transform: rotateY(180deg); }
+        .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 32px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; border: 2px solid #E2E8F0; background: white; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); }
+        .card-back { background: var(--primary); color: white; transform: rotateY(180deg); border: none; }
         
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .chat-bubble { max-width: 90%; padding: 14px 18px; border-radius: 24px; font-size: 14px; line-height: 1.6; white-space: pre-wrap; }
+        .bubble-bot { background: white; border: 1px solid #E2E8F0; color: #334155; }
+        .bg-style-dark .bubble-bot { background: #1e293b; color: white; border-color: #334155; }
+        .bubble-user { background: var(--primary); color: white; align-self: flex-end; }
+        
         .view-animate { animation: fadeInUp 0.4s ease-out; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         
-        .ai-loading {
-            display: inline-block; width: 18px; height: 18px; border: 3px solid rgba(0,0,0,0.1); border-radius: 50%; border-top-color: var(--primary); animation: spin 1s linear infinite;
-        }
+        .ai-loading { display: inline-block; width: 18px; height: 18px; border: 3px solid rgba(0,0,0,0.1); border-radius: 50%; border-top-color: var(--primary); animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        .card-inner { position: relative; width: 100%; height: 350px; transition: transform 0.6s; transform-style: preserve-3d; cursor: pointer; }
-        .card-inner.is-flipped { transform: rotateY(180deg); }
-        .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 32px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; border: 2px solid #E2E8F0; background: white; }
-        .bg-style-dark .card-face { background: #1e293b; border-color: #334155; }
-        .card-back { background: var(--primary); color: white; transform: rotateY(180deg); border: none; }
-
-        .chat-bubble { max-width: 90%; padding: 14px 18px; border-radius: 24px; font-size: 14px; line-height: 1.6; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); white-space: pre-wrap; }
-        .bubble-bot { background: white; border: 1px solid #E2E8F0; border-bottom-left-radius: 4px; color: #334155; }
-        .bg-style-dark .bubble-bot { background: #334155; border-color: #475569; color: #f1f5f9; }
-        .bubble-user { background: var(--primary); color: white; border-bottom-right-radius: 4px; align-self: flex-end; }
-
-        .rank-gold { background: linear-gradient(135deg, #FDE68A 0%, #F59E0B 100%); color: #78350F; border: 2px solid #FBBF24; box-shadow: 0 0 15px rgba(245, 158, 11, 0.3); }
-        .rank-silver { background: linear-gradient(135deg, #E2E8F0 0%, #94A3B8 100%); color: #1E293B; border: 2px solid #CBD5E1; }
-        .rank-bronze { background: linear-gradient(135deg, #FFEDD5 0%, #D97706 100%); color: #7C2D12; border: 2px solid #FDBA74; }
+        .ad-simulation-overlay { position: fixed; inset: 0; z-index: 200; background: black; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); z-index: 300; display: flex; align-items: center; justify-content: center; padding: 1.5rem; }
         
-        .streak-badge { background: linear-gradient(to bottom, #FF8C00, #FF4500); color: white; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 800; display: flex; align-items: center; gap: 4px; }
-        .logo-svg { width: 42px; height: 42px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); }
+        input { border: 1px solid #E2E8F0; padding: 12px 16px; border-radius: 12px; font-size: 14px; outline: none; transition: border 0.2s; }
+        input:focus { border-color: var(--primary); }
     </style>
 </head>
 <body class="pb-32 theme-blue bg-style-default">
 
-    <!-- Auth Screen -->
-    <div id="auth-screen" class="fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center p-8 text-center">
-        <div class="mb-8">
-            <svg class="logo-svg mx-auto mb-4" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="50" cy="50" r="50" fill="url(#grad1)"/>
-                <path d="M30 50L45 65L70 35" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
-                <defs>
-                    <linearGradient id="grad1" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
-                        <stop stop-color="#0EA5E9"/>
-                        <stop offset="1" stop-color="#10B981"/>
-                    </linearGradient>
-                </defs>
-            </svg>
-            <h1 class="text-3xl font-black text-primary tracking-tighter mb-2">LingoQuest<br><span class="text-emerald-500 text-4xl uppercase tracking-widest">Legacy Pro</span></h1>
-            <p class="text-slate-400 text-sm italic">Honrando as origens, dominando o futuro.</p>
-        </div>
-        <div class="w-full max-w-sm space-y-4">
-            <button onclick="loginWithGoogle()" class="w-full flex items-center justify-center space-x-3 py-4 bg-white border-2 border-slate-100 rounded-2xl font-bold text-slate-700 shadow-sm transition-all active:scale-95">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/action/google.svg" class="w-6 h-6" alt="Google">
-                <span>Entrar com Gmail</span>
-            </button>
-            <button onclick="loginAnonymously()" class="w-full py-4 bg-slate-50 text-slate-400 rounded-2xl font-bold text-xs uppercase border border-slate-100 active:scale-95 transition-all">Visitante</button>
+    <!-- Modal de Confirmação -->
+    <div id="modal-container" class="modal-overlay hidden">
+        <div class="bg-white rounded-[2.5rem] w-full max-w-sm p-8 shadow-2xl">
+            <h3 id="modal-title" class="text-xl font-black mb-2 text-slate-800">Confirmar</h3>
+            <p id="modal-text" class="text-sm text-slate-500 mb-8 leading-relaxed"></p>
+            <div class="flex space-x-3">
+                <button onclick="closeModal()" class="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-bold">Cancelar</button>
+                <button id="modal-confirm-btn" class="flex-1 py-4 bg-primary text-white rounded-2xl font-bold shadow-lg">Confirmar</button>
+            </div>
         </div>
     </div>
 
-    <!-- Main UI -->
-    <div id="main-ui" class="hidden">
-        <header class="p-6 flex justify-between items-center glass sticky top-0 z-40 border-b border-slate-100">
-            <div onclick="changeView('home')" class="cursor-pointer flex items-center space-x-3">
-                <svg class="w-9 h-9" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="50" cy="50" r="50" fill="var(--primary)"/>
+    <!-- Toast de Notificação -->
+    <div id="toast-notif" class="fixed top-8 left-1/2 -translate-x-1/2 z-[400] bg-slate-900 text-white px-6 py-3 rounded-full text-xs font-bold shadow-2xl hidden"></div>
+
+    <!-- Auth Screen -->
+    <div id="auth-screen" class="fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center p-8 overflow-y-auto">
+        <div class="w-full max-w-sm text-center">
+            <div class="mb-6">
+                <svg class="w-12 h-12 mx-auto mb-4" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="50" cy="50" r="50" fill="#0284C7"/>
                     <path d="M30 50L45 65L70 35" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
-                <div>
-                    <h1 class="text-lg font-extrabold text-primary tracking-tighter leading-none">LingoQuest <span class="text-emerald-500">Legacy</span></h1>
-                    <div class="flex items-center space-x-2 mt-1">
-                        <div id="streak-container" class="streak-badge">🔥 <span id="ui-streak-count">0</span></div>
-                        <span id="ui-current-lvl-tag" class="text-[8px] font-bold text-slate-400 uppercase tracking-widest italic">Legacy Pro Edition</span>
-                    </div>
+                <h1 class="text-3xl font-black text-[#0284C7] tracking-tighter mb-1">LingoQuest<br><span class="text-emerald-500 text-2xl uppercase tracking-widest">Legacy Pro</span></h1>
+                <p class="text-slate-400 text-xs italic">Cria a tua conta oficial.</p>
+            </div>
+
+            <div class="flex bg-slate-100 p-1 rounded-xl mb-6">
+                <button onclick="toggleAuthMode('login')" id="tab-login" class="flex-1 py-2 text-xs font-bold rounded-lg bg-white shadow-sm transition-all">Login</button>
+                <button onclick="toggleAuthMode('register')" id="tab-register" class="flex-1 py-2 text-xs font-bold text-slate-400 transition-all">Registo</button>
+            </div>
+
+            <div class="flex flex-col space-y-3 mb-6">
+                <input type="email" id="auth-email" placeholder="O teu e-mail" class="w-full">
+                <input type="password" id="auth-password" placeholder="Password (min. 6 carateres)" class="w-full">
+                <button id="btn-auth-submit" class="w-full py-4 bg-primary text-white rounded-2xl font-black text-sm uppercase shadow-lg shadow-sky-200">Entrar</button>
+            </div>
+
+            <div class="flex items-center my-6">
+                <div class="flex-1 h-px bg-slate-100"></div>
+                <span class="px-4 text-[10px] text-slate-300 font-bold uppercase">Ou continuar com</span>
+                <div class="flex-1 h-px bg-slate-100"></div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <button id="btn-login-google" class="py-3 px-4 bg-white border border-slate-200 rounded-xl flex items-center justify-center space-x-2 active:scale-95 transition-all">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/action/google.svg" class="w-4 h-4">
+                    <span class="text-xs font-bold text-slate-600">Google</span>
+                </button>
+                <button id="btn-login-guest" class="py-3 px-4 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center space-x-2 active:scale-95 transition-all">
+                    <span class="text-lg">👤</span>
+                    <span class="text-xs font-bold text-slate-500">Convidado</span>
+                </button>
+            </div>
+            
+            <p id="auth-error-msg" class="mt-4 text-[10px] text-rose-500 font-bold hidden"></p>
+        </div>
+    </div>
+
+    <!-- UI Principal -->
+    <div id="main-ui" class="hidden">
+        <header class="p-6 flex justify-between items-center glass sticky top-0 z-40 border-b border-slate-100">
+            <div id="header-logo-container" class="cursor-pointer">
+                <h1 class="text-xl font-extrabold text-primary tracking-tighter leading-none">LingoQuest <span class="text-emerald-500">Legacy</span></h1>
+                <div class="flex items-center space-x-2 mt-1">
+                    <div class="bg-orange-500 text-white px-2 py-0.5 rounded text-[8px] font-bold">🔥 <span id="ui-streak">0</span></div>
+                    <span class="text-[8px] font-bold text-slate-400 uppercase tracking-widest italic">Play Store Version</span>
                 </div>
             </div>
             <div class="flex items-center space-x-2">
-                <button onclick="changeView('settings')" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 text-slate-500 shadow-sm">⚙️</button>
-                <div class="bg-amber-100 px-3 py-1.5 rounded-2xl border border-amber-200 flex items-center shadow-sm">
-                    <span class="text-amber-600 font-extrabold text-sm">💎 <span id="ui-gems-count">0</span></span>
+                <div class="bg-amber-100 px-3 py-1.5 rounded-2xl text-amber-600 font-extrabold text-sm border border-amber-200">
+                    💎 <span id="ui-gems">0</span>
                 </div>
             </div>
         </header>
@@ -180,415 +140,370 @@
         <main id="app-viewport" class="px-6 py-4 max-w-lg mx-auto min-h-[60vh]"></main>
 
         <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-6 py-4 flex justify-between items-center z-50 shadow-2xl">
-            <button onclick="changeView('home')" id="nav-home" class="flex flex-col items-center transition-all nav-active">
-                <span class="text-2xl">🏠</span>
-                <span id="nav-txt-home" class="text-[9px] font-bold uppercase mt-1">Início</span>
-            </button>
-            <button onclick="changeView('flashcards')" id="nav-flashcards" class="flex flex-col items-center transition-all text-slate-400">
-                <span class="text-2xl">📚</span>
-                <span id="nav-txt-study" class="text-[9px] font-bold uppercase mt-1">Estudo</span>
-            </button>
-            <button onclick="changeView('tutor')" id="nav-tutor-btn" class="flex flex-col items-center transition-all text-slate-400">
-                <span class="text-2xl">🤖</span>
-                <span id="nav-txt-tutor" class="text-[9px] font-bold uppercase mt-1">IA Tutor</span>
-            </button>
-            <button onclick="changeView('grammar')" id="nav-grammar" class="flex flex-col items-center transition-all text-slate-400">
-                <span class="text-2xl">✍️</span>
-                <span id="nav-txt-grammar" class="text-[9px] font-bold uppercase mt-1 text-inherit">Gramática</span>
-            </button>
-            <button onclick="changeView('ranking')" id="nav-ranking" class="flex flex-col items-center transition-all text-slate-400">
-                <span class="text-2xl">🏆</span>
-                <span id="nav-txt-ranking" class="text-[9px] font-bold uppercase mt-1">Ranking</span>
-            </button>
+            <button onclick="changeView('home')" id="nav-home" class="flex flex-col items-center transition-all nav-active"><span class="text-2xl">🏠</span></button>
+            <button onclick="changeView('flashcards')" id="nav-flashcards" class="flex flex-col items-center transition-all text-slate-400"><span class="text-2xl">📚</span></button>
+            <button onclick="changeView('tutor')" id="nav-tutor" class="flex flex-col items-center transition-all text-slate-400"><span class="text-2xl">🤖</span></button>
+            <button onclick="changeView('grammar')" id="nav-grammar" class="flex flex-col items-center transition-all text-slate-400"><span class="text-2xl">✍️</span></button>
+            <button onclick="changeView('store')" id="nav-store" class="flex flex-col items-center transition-all text-slate-400"><span class="text-2xl">🏪</span></button>
+            <button onclick="changeView('settings')" id="nav-settings" class="flex flex-col items-center transition-all text-slate-400"><span class="text-2xl">⚙️</span></button>
         </nav>
     </div>
 
-    <script type="module">
-        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { doc, setDoc, onSnapshot, getDoc, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    <!-- Simulador de AdMob Overlay -->
+    <div id="ad-overlay" class="ad-simulation-overlay hidden">
+        <div class="absolute top-6 right-6 text-xs font-bold text-white/40" id="ad-timer">Anúncio acaba em 5s...</div>
+        <div class="text-center p-8">
+            <div class="text-6xl mb-6">📺</div>
+            <h3 class="text-xl font-black mb-2 uppercase">AdMob Video Ad</h3>
+            <div class="w-64 h-2 bg-white/10 rounded-full overflow-hidden">
+                <div id="ad-progress" class="bg-primary h-full w-0 transition-all duration-[5000ms] ease-linear"></div>
+            </div>
+        </div>
+    </div>
 
-        const apiKey = "";
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInAnonymously, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- Firebase Config ---
+        const envConfig = window.__firebase_config ? JSON.parse(window.__firebase_config) : null;
+        const firebaseConfig = envConfig || { apiKey: "", authDomain: "", projectId: "", storageBucket: "", messagingSenderId: "", appId: "" };
+        const appId = typeof window.__app_id !== 'undefined' ? window.__app_id : 'lingoquest-legacy-pro';
+        
+        const geminiApiKey = ""; 
         const geminiModel = "gemini-2.5-flash-preview-09-2025";
 
-        const I18N = {
-            pt: { home: "Início", study: "Estudo", tutor: "IA Tutor", grammar: "Gramática", ranking: "Ranking", settings: "Definições", level: "Nível", basic: "Básico", inter: "Intermédio", adv: "Avançado", welcome: "Bem-vindo", example: "Exemplo IA", next: "Próximo", prev: "Anterior", listen: "Ouvir", reset: "Reiniciar Tudo", analyze: "Analisar", analyzing: "Analisando...", placeholder_grammar: "Escreve o teu texto em inglês...", bg_style: "Estilo de Fundo" },
-            en: { home: "Home", study: "Study", tutor: "AI Tutor", grammar: "Grammar", ranking: "Ranking", settings: "Settings", level: "Level", basic: "Basic", inter: "Intermediate", adv: "Advanced", welcome: "Welcome", example: "AI Example", next: "Next", prev: "Prev", listen: "Listen", reset: "Reset All", analyze: "Analyze", analyzing: "Analyzing...", placeholder_grammar: "Write your English text...", bg_style: "Background Style" }
-        };
-
-        const GAME_DATA = {
-            basic: { label_key: "basic", cost: 0, cards: [{en: "Knowledge", pt: "Conhecimento"}, {en: "Goal", pt: "Objetivo"}] },
-            intermediate: { label_key: "inter", cost: 250, cards: [{en: "Worth it", pt: "Vale a pena"}, {en: "Ambiguous", pt: "Ambíguo"}] },
-            advanced: { 
-                label_key: "adv", 
-                cost: 600, 
-                cards: [
-                    {en: "Eloquent", pt: "Eloquente"}, 
-                    {en: "Nevertheless", pt: "Todavia"},
-                    {en: "Paradigm shift", pt: "Mudança de paradigma"}
-                ] 
-            }
-        };
-
-        let state = {
-            user: null,
-            gems: 0,
-            xp: 0,
-            streak: 0,
-            lastLoginDate: null,
-            unlocked: ['basic'],
-            level: 'basic',
-            view: 'home',
-            theme: 'theme-blue',
-            bgStyle: 'bg-style-default',
-            lang: 'pt',
-            cardIdx: 0,
-            chatMessages: [],
-            grammarAnalysis: null,
-            leaderboard: []
-        };
-
-        const db = window.db;
-        const auth = window.auth;
-
-        function updateStreakLogic() {
-            const today = new Date().toISOString().split('T')[0];
-            if (!state.lastLoginDate) {
-                state.streak = 1;
-            } else {
-                const lastDate = new Date(state.lastLoginDate);
-                const currDate = new Date(today);
-                const diffTime = Math.abs(currDate - lastDate);
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                if (diffDays === 1) state.streak += 1;
-                else if (diffDays > 1) state.streak = 1;
-            }
-            state.lastLoginDate = today;
+        let auth, db;
+        if (firebaseConfig.apiKey) {
+            try {
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+            } catch (e) { console.error("Firebase Init Error", e); }
         }
 
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                state.user = user;
-                document.getElementById('auth-screen').classList.add('hidden');
-                document.getElementById('main-ui').classList.remove('hidden');
-                syncUserData(user.uid);
-                syncLeaderboard();
-                changeView(state.view);
-            } else {
-                document.getElementById('auth-screen').classList.remove('hidden');
-                document.getElementById('main-ui').classList.add('hidden');
-            }
-        });
+        let state = {
+            user: null, xp: 0, gems: 0, streak: 0, totalTimeMinutes: 0, lastLoginDate: null, sessionStartTime: Date.now(),
+            level: 'basic', view: 'home', theme: 'theme-blue', bgStyle: 'bg-style-default', cardIdx: 0,
+            chatMessages: [], grammarAnalysis: null, dailyMission: null, immersiveContext: null,
+            unlockedLevels: ['basic'],
+            achievements: { 'first_step': true, 'scholar': false, 'master': false }
+        };
 
-        async function syncUserData(uid) {
-            const userDocRef = doc(db, 'artifacts', window.appId, 'users', uid, 'profile', 'data');
-            onSnapshot(userDocRef, (docSnap) => {
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    state.gems = data.gems || 0;
-                    state.unlocked = data.unlocked || ['basic'];
-                    state.xp = data.xp || 0;
-                    state.streak = data.streak || 0;
-                    state.lastLoginDate = data.lastLoginDate || null;
-                    state.theme = data.theme || 'theme-blue';
-                    state.bgStyle = data.bgStyle || 'bg-style-default';
-                    state.lang = data.lang || 'pt';
-                    if (!window.streakUpdated) {
-                        updateStreakLogic();
-                        window.streakUpdated = true;
-                        saveData();
-                    }
-                    applyTheme(state.theme);
-                    applyBackground(state.bgStyle);
-                    updateUI();
-                } else { saveData(); }
+        const LEVEL_COSTS = { basic: 0, intermediate: 200, advanced_tech: 500 };
+
+        const GAME_DATA = {
+            basic: { cards: [{en: "I am a teacher", pt: "Eu sou professor(a)", cat: "Pilar: Básico"}, {en: "Do you like coffee?", pt: "Gostas de café?", cat: "Pilar: Básico"}] },
+            intermediate: { cards: [{en: "I have finished my homework", pt: "Eu terminei o meu TPC", cat: "Tempo: Intermédio"}, {en: "If it rains, I'll stay at home", pt: "Se chover, ficarei em casa", cat: "Gramática: Intermédio"}] },
+            advanced_tech: { cards: [{en: "To charter", pt: "Fretar (Navio/Carga)", cat: "Avançado Técnico (PDF)"}, {en: "Toxic Gas", pt: "Gás Tóxico", cat: "Dangerous Cargo"}, {en: "To containerize", pt: "Conteinerizar", cat: "Verbos Marítimos"}] }
+        };
+
+        // --- Auth Implementation ---
+        let authMode = 'login';
+        window.toggleAuthMode = (mode) => {
+            authMode = mode;
+            const btn = document.getElementById('btn-auth-submit');
+            const tabLogin = document.getElementById('tab-login');
+            const tabRegister = document.getElementById('tab-register');
+            if (mode === 'login') {
+                btn.textContent = 'Entrar';
+                tabLogin.className = 'flex-1 py-2 text-xs font-bold rounded-lg bg-white shadow-sm';
+                tabRegister.className = 'flex-1 py-2 text-xs font-bold text-slate-400';
+            } else {
+                btn.textContent = 'Criar Conta';
+                tabRegister.className = 'flex-1 py-2 text-xs font-bold rounded-lg bg-white shadow-sm';
+                tabLogin.className = 'flex-1 py-2 text-xs font-bold text-slate-400';
+            }
+        };
+
+        const showError = (msg) => {
+            const el = document.getElementById('auth-error-msg');
+            el.textContent = msg; el.classList.remove('hidden');
+            setTimeout(() => el.classList.add('hidden'), 5000);
+        };
+
+        if (auth) {
+            onAuthStateChanged(auth, (user) => {
+                if (user) { 
+                    state.user = user; syncUserData(user.uid); 
+                    document.getElementById('auth-screen').classList.add('hidden');
+                    document.getElementById('main-ui').classList.remove('hidden');
+                    changeView('home');
+                } else { 
+                    document.getElementById('auth-screen').classList.remove('hidden');
+                    document.getElementById('main-ui').classList.add('hidden');
+                }
             });
+        }
+
+        document.getElementById('btn-auth-submit').onclick = async () => {
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+            if (!email || password.length < 6) return showError("Dados inválidos.");
+            try {
+                if (authMode === 'login') await signInWithEmailAndPassword(auth, email, password);
+                else await createUserWithEmailAndPassword(auth, email, password);
+            } catch (e) { showError(e.message); }
+        };
+
+        document.getElementById('btn-login-google').onclick = async () => {
+            const provider = new GoogleAuthProvider();
+            try { await signInWithPopup(auth, provider); } catch (e) { showError(e.message); }
+        };
+
+        document.getElementById('btn-login-guest').onclick = () => {
+            if (auth) signInAnonymously(auth); else enterGuestMode();
+        };
+
+        function enterGuestMode() {
+            document.getElementById('auth-screen').classList.add('hidden');
+            document.getElementById('main-ui').classList.remove('hidden');
+            changeView('home');
+        }
+
+        // --- Data Handling ---
+        async function syncUserData(uid) {
+            if (!db) return;
+            const userDocRef = doc(db, 'artifacts', appId, 'users', uid, 'profile', 'data');
+            onSnapshot(userDocRef, (docSnap) => {
+                if (docSnap.exists()) { 
+                    const data = docSnap.data();
+                    const { user, ...rest } = data; 
+                    Object.assign(state, rest); 
+                    updateUI(); 
+                } else { saveData(); }
+            }, (err) => console.error("Sync Error", err));
         }
 
         async function saveData() {
-            if (!state.user) return;
-            const uid = state.user.uid;
-            const userDocRef = doc(db, 'artifacts', window.appId, 'users', uid, 'profile', 'data');
-            await setDoc(userDocRef, {
-                gems: state.gems, unlocked: state.unlocked, xp: state.xp, streak: state.streak, 
-                lastLoginDate: state.lastLoginDate, theme: state.theme, bgStyle: state.bgStyle, lang: state.lang, updatedAt: new Date().toISOString()
-            }, { merge: true });
-            const leaderboardDocRef = doc(db, 'artifacts', window.appId, 'public', 'data', 'leaderboard', uid);
-            await setDoc(leaderboardDocRef, { displayName: state.user.displayName || 'Utilizador Legacy', xp: state.xp, updatedAt: new Date().toISOString() }, { merge: true });
+            if (!state.user || !db) return;
+            const userDocRef = doc(db, 'artifacts', appId, 'users', state.user.uid, 'profile', 'data');
+            const dataToSave = { ...state };
+            delete dataToSave.user; 
+            try { await setDoc(userDocRef, { ...dataToSave, updatedAt: new Date().toISOString() }, { merge: true }); } catch (e) { console.error("Save Error", e); }
         }
 
-        function syncLeaderboard() {
-            const leaderboardCol = collection(db, 'artifacts', window.appId, 'public', 'data', 'leaderboard');
-            onSnapshot(leaderboardCol, (snapshot) => {
-                const data = [];
-                snapshot.forEach(doc => data.push({ id: doc.id, ...doc.data() }));
-                state.leaderboard = data.sort((a, b) => b.xp - a.xp);
-                if (state.view === 'ranking') renderRanking(document.getElementById('app-viewport'), I18N[state.lang]);
-            });
-        }
-
-        window.speakText = (text) => {
-            if (!window.speechSynthesis) return;
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'en-US';
-            utterance.rate = 0.9;
-            window.speechSynthesis.speak(utterance);
-        };
-
-        function applyTheme(t) {
-            document.body.classList.remove('theme-blue', 'theme-emerald', 'theme-rose', 'theme-slate');
-            document.body.classList.add(t);
-            state.theme = t;
-        }
-
-        function applyBackground(bg) {
-            document.body.classList.remove('bg-style-default', 'bg-style-cream', 'bg-style-dark', 'bg-style-gradient-sky', 'bg-style-gradient-sunset');
-            document.body.classList.add(bg);
-            state.bgStyle = bg;
-        }
-
+        // --- App Views ---
         window.changeView = (view) => {
             state.view = view;
             const viewport = document.getElementById('app-viewport');
+            
+            // Gestão visual da navegação
             document.querySelectorAll('nav button').forEach(b => {
-                b.classList.remove('nav-active');
-                b.classList.add('text-slate-400');
+                b.classList.remove('nav-active'); b.classList.add('text-slate-400');
             });
-            const activeNav = document.getElementById(view === 'tutor' ? 'nav-tutor-btn' : (view === 'grammar' ? 'nav-grammar' : `nav-${view}`));
-            if (activeNav) {
-                activeNav.classList.add('nav-active');
-                activeNav.classList.remove('text-slate-400');
-            }
+            const navBtn = document.getElementById(`nav-${view}`);
+            if (navBtn) { navBtn.classList.add('nav-active'); navBtn.classList.remove('text-slate-400'); }
+            
             viewport.innerHTML = '';
-            const s = I18N[state.lang];
+            updateUI();
+            
             switch(view) {
-                case 'home': renderHome(viewport, s); break;
-                case 'flashcards': renderFlashcards(viewport, s); break;
-                case 'tutor': renderTutor(viewport, s); break;
-                case 'grammar': renderGrammar(viewport, s); break;
-                case 'ranking': renderRanking(viewport, s); break;
-                case 'settings': renderSettings(viewport, s); break;
+                case 'home': renderHome(viewport); break;
+                case 'flashcards': renderFlashcards(viewport); break;
+                case 'tutor': renderTutor(viewport); break;
+                case 'grammar': renderGrammar(viewport); break;
+                case 'store': renderStore(viewport); break;
+                case 'settings': renderSettings(viewport); break;
+                case 'terms': renderTerms(viewport); break;
             }
         };
 
-        function renderHome(container, s) {
-            container.innerHTML = `
-                <div class="view-animate text-center sm:text-left">
-                    <div class="bg-primary rounded-[2.5rem] p-8 text-white shadow-xl mb-8 flex justify-between items-center overflow-hidden relative">
-                        <div class="z-10">
-                            <h2 class="text-2xl font-bold mb-1 italic">${s.welcome}!</h2>
-                            <p class="text-white/70 text-[10px] uppercase font-bold tracking-widest">${s.level}: ${s[GAME_DATA[state.level].label_key]}</p>
-                            <div class="mt-4 flex gap-2">
-                                <div class="bg-white/20 px-3 py-1 rounded-full text-[9px] font-bold">XP: ${state.xp}</div>
-                                <div class="bg-white/20 px-3 py-1 rounded-full text-[9px] font-bold">🔥 ${state.streak} dias</div>
-                            </div>
-                        </div>
-                        <div class="text-6xl opacity-20 absolute -right-4 -bottom-4">🌟</div>
-                    </div>
-                    <div class="space-y-3">
-                        ${Object.keys(GAME_DATA).map(lvl => `
-                            <button onclick="setLevel('${lvl}')" class="w-full flex items-center justify-between p-6 rounded-3xl border-2 ${state.level === lvl ? 'border-primary bg-primary-light' : 'bg-white border-slate-100'} transition-all active:scale-95 shadow-sm group">
-                                <span class="font-bold text-slate-700 uppercase text-xs tracking-widest group-hover:text-primary transition-colors">${s[GAME_DATA[lvl].label_key]}</span>
-                                <span class="text-xs text-slate-500">${state.unlocked.includes(lvl) ? '✅' : '🔒 💎' + GAME_DATA[lvl].cost}</span>
-                            </button>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderFlashcards(container, s) {
-            const card = GAME_DATA[state.level].cards[state.cardIdx];
-            container.innerHTML = `
-                <div class="view-animate text-center">
-                    <div class="card-container mb-8" onclick="flipFlashcard(this, '${card.en}')">
-                        <div class="card-inner">
-                            <div class="card-face card-front relative border-4 border-primary/20">
-                                <button onclick="event.stopPropagation(); speakText('${card.en}')" class="absolute top-4 right-4 bg-slate-100 p-3 rounded-2xl text-xl hover:bg-primary hover:text-white transition-all shadow-sm">🔊</button>
-                                <div class="text-[10px] uppercase font-bold text-slate-400 mb-4 tracking-widest">Inglês</div>
-                                <h3 class="text-4xl font-black text-primary">${card.en}</h3>
-                                <p class="text-slate-400 mt-12 italic text-[10px] font-bold uppercase tracking-widest">Toca para traduzir</p>
-                            </div>
-                            <div class="card-face card-back border-4 border-white/20 shadow-inner">
-                                <div class="text-[10px] uppercase font-bold text-white/50 mb-4 tracking-widest">Português</div>
-                                <h3 class="text-3xl font-bold">${card.pt}</h3>
-                                <div id="ai-example" class="mt-6 text-[11px] opacity-90 italic px-4 font-medium text-white/80 leading-relaxed bg-black/10 py-3 rounded-2xl"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex space-x-3">
-                        <button onclick="navCard(-1)" class="flex-1 py-4 bg-white border-2 border-slate-100 rounded-2xl font-bold text-slate-400 shadow-sm">${s.prev}</button>
-                        <button onclick="navCard(1)" class="flex-1 py-4 bg-primary text-white rounded-2xl font-bold shadow-lg active:scale-95">${s.next}</button>
-                    </div>
-                </div>
-            `;
-        }
-
-        window.flipFlashcard = (el, englishText) => {
-            const inner = el.querySelector('.card-inner');
-            const isFlippingToBack = !inner.classList.contains('is-flipped');
-            inner.classList.toggle('is-flipped');
-            if (isFlippingToBack) setTimeout(() => speakText(englishText), 100);
-        };
-
-        function renderGrammar(container, s) {
-            container.innerHTML = `
+        function renderHome(v) {
+            v.innerHTML = `
                 <div class="view-animate">
-                    <h2 class="text-2xl font-black mb-4 tracking-tight">${s.grammar}</h2>
-                    <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 mb-4">
-                        <textarea id="grammar-input" placeholder="${s.placeholder_grammar}" class="w-full h-40 bg-transparent resize-none outline-none text-sm leading-relaxed"></textarea>
+                    <div class="bg-primary rounded-[2.5rem] p-8 text-white shadow-xl mb-6 relative overflow-hidden">
+                        <h2 class="text-2xl font-bold mb-1 italic">Olá, Explorador!</h2>
+                        <p class="text-white/70 text-[10px] uppercase font-bold tracking-widest">XP Total: ${state.xp}</p>
+                        <div class="mt-6 bg-white/20 h-2 rounded-full overflow-hidden"><div class="bg-white h-full" style="width: ${(state.xp % 100)}%"></div></div>
                     </div>
-                    <button onclick="analyzeGrammar()" id="grammar-btn" class="w-full py-4 bg-primary text-white rounded-2xl font-bold shadow-lg active:scale-95 flex items-center justify-center space-x-2">
-                        <span id="grammar-btn-text">✍️ ${s.analyze}</span>
-                        <div id="grammar-loader" class="ai-loading border-t-white hidden"></div>
-                    </button>
-                    <div id="grammar-result" class="mt-6 ${state.grammarAnalysis ? '' : 'hidden'} pb-10">
-                        ${state.grammarAnalysis ? `<div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm text-sm chat-bubble bubble-bot w-full">${state.grammarAnalysis}</div>` : ''}
-                    </div>
-                </div>
-            `;
-        }
-
-        window.analyzeGrammar = async () => {
-            const input = document.getElementById('grammar-input');
-            const btnText = document.getElementById('grammar-btn-text');
-            const loader = document.getElementById('grammar-loader');
-            const s = I18N[state.lang];
-            if (!input.value.trim()) return;
-            loader.classList.remove('hidden');
-            btnText.innerText = s.analyzing;
-            const prompt = `Analisa e corrige este texto em inglês: "${input.value.trim()}". Estrutura por pontos em Português.`;
-            state.grammarAnalysis = await callGemini(prompt, "Especialista em Gramática Legacy.");
-            renderGrammar(document.getElementById('app-viewport'), s);
-        };
-
-        async function callGemini(prompt, systemMsg = "") {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${apiKey}`;
-            try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: prompt }] }],
-                        systemInstruction: { parts: [{ text: "Tutor profissional LingoQuest. Responde em Português de forma organizada. " + systemMsg }] }
-                    })
-                });
-                const result = await response.json();
-                return result.candidates?.[0]?.content?.parts?.[0]?.text || "Erro na IA.";
-            } catch (e) { return "Erro de ligação."; }
-        }
-
-        function renderRanking(container, s) {
-            container.innerHTML = `
-                <div class="view-animate">
-                    <h2 class="text-2xl font-black mb-6 tracking-tight">${s.ranking} Global</h2>
-                    <div class="space-y-3">
-                        ${state.leaderboard.map((u, i) => {
-                            let badge = i + 1; let bClass = "bg-slate-100";
-                            if(i===0) { badge="🥇"; bClass="rank-gold"; }
-                            else if(i===1) { badge="🥈"; bClass="rank-silver"; }
-                            else if(i===2) { badge="🥉"; bClass="rank-bronze"; }
-                            return `
-                                <div class="flex items-center justify-between p-5 rounded-3xl border-2 ${u.id === state.user?.uid ? 'bg-primary text-white border-primary shadow-lg scale-[1.02]' : 'bg-white border-slate-50'} transition-all">
-                                    <div class="flex items-center">
-                                        <div class="w-10 h-10 rounded-2xl flex items-center justify-center font-black mr-4 ${bClass}">${badge}</div>
-                                        <div class="font-bold text-sm">${u.displayName}</div>
-                                    </div>
-                                    <div class="font-black text-xs">XP ${u.xp}</div>
-                                </div>
-                            `;
-                        }).join('')}
+                    <div class="grid grid-cols-1 gap-4">
+                        ${renderLevelBtn('basic', 'Básico', '🌱')}
+                        ${renderLevelBtn('intermediate', 'Intermédio', '🏆')}
+                        ${renderLevelBtn('advanced_tech', 'Avançado Técnico ✨', '🚢')}
                     </div>
                 </div>
             `;
         }
 
-        function renderTutor(container, s) {
-            container.innerHTML = `
-                <div class="view-animate flex flex-col h-full">
-                    <div id="chat-win" class="flex-1 overflow-y-auto space-y-4 p-4 bg-white/50 rounded-[2.5rem] border border-slate-100 min-h-[400px]">
-                        ${state.chatMessages.map(m => `<div class="flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}"><div class="chat-bubble ${m.role === 'user' ? 'bubble-user' : 'bubble-bot'} shadow-sm">${m.text}</div></div>`).join('') || '<p class="text-center py-20 text-slate-400">Conversa comigo em Inglês!</p>'}
-                    </div>
-                    <div class="flex mt-4 space-x-2 bg-white p-2 rounded-3xl shadow-sm border border-slate-100">
-                        <input id="chat-in" type="text" placeholder="Type here..." class="flex-1 p-3 px-4 outline-none text-sm bg-transparent">
-                        <button onclick="sendChat()" class="p-3 px-5 bg-primary text-white rounded-2xl font-bold shadow-lg">⚡</button>
-                    </div>
-                </div>
-            `;
-            const w = document.getElementById('chat-win'); w.scrollTop = w.scrollHeight;
-        }
-
-        window.sendChat = async () => {
-            const i = document.getElementById('chat-in');
-            const txt = i.value.trim();
-            if(!txt) return;
-            state.chatMessages.push({role: 'user', text: txt});
-            i.value = ''; renderTutor(document.getElementById('app-viewport'), I18N[state.lang]);
-            const res = await callGemini(txt, `Tutor Legacy. Conversa amigável.`);
-            state.chatMessages.push({role: 'bot', text: res});
-            renderTutor(document.getElementById('app-viewport'), I18N[state.lang]);
-        };
-
-        function renderSettings(container, s) {
-            container.innerHTML = `
-                <div class="view-animate space-y-6">
-                    <h2 class="text-2xl font-black tracking-tight">${s.settings}</h2>
-                    
-                    <div>
-                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Cor de Destaque</p>
-                        <div class="grid grid-cols-4 gap-3">
-                            ${['blue','emerald','rose','slate'].map(c => `<button onclick="updateTheme('theme-${c}')" class="h-14 bg-${c==='blue'?'sky':(c==='emerald'?'emerald':(c==='rose'?'rose':'slate'))}-500 rounded-2xl active:scale-95 transition-all shadow-md border-4 ${state.theme === 'theme-'+c ? 'border-white ring-2 ring-slate-200' : 'border-white'}"></button>`).join('')}
-                        </div>
-                    </div>
-
-                    <div>
-                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">${s.bg_style}</p>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <button onclick="updateBackground('bg-style-default')" class="p-4 bg-slate-50 border-2 rounded-2xl font-bold text-sm ${state.bgStyle === 'bg-style-default' ? 'border-primary' : 'border-slate-200'}">Padrão</button>
-                            <button onclick="updateBackground('bg-style-cream')" class="p-4 bg-amber-50 border-2 rounded-2xl font-bold text-sm ${state.bgStyle === 'bg-style-cream' ? 'border-primary' : 'border-slate-200'}">Leitura (Creme)</button>
-                            <button onclick="updateBackground('bg-style-dark')" class="p-4 bg-slate-900 text-white border-2 rounded-2xl font-bold text-sm ${state.bgStyle === 'bg-style-dark' ? 'border-primary' : 'border-slate-200'}">Noite (Dark)</button>
-                            <button onclick="updateBackground('bg-style-gradient-sky')" class="p-4 bg-gradient-to-br from-sky-100 to-white border-2 rounded-2xl font-bold text-sm ${state.bgStyle === 'bg-style-gradient-sky' ? 'border-primary' : 'border-slate-200'}">Céu Suave</button>
-                        </div>
-                    </div>
-
-                    <div class="space-y-3 pt-6 pb-8 text-center sm:text-left">
-                        <button onclick="handleReset()" class="w-full py-4 bg-rose-50 text-rose-600 rounded-2xl font-bold border border-rose-100 text-sm shadow-sm active:scale-95 transition-all">${s.reset}</button>
-                        <button onclick="window.signOut(window.auth)" class="w-full py-4 bg-white text-slate-400 rounded-2xl font-bold border border-slate-100 text-sm shadow-sm active:scale-95 transition-all">Sair da Conta</button>
-                    </div>
-                </div>
+        function renderLevelBtn(id, label, icon) {
+            const isUnlocked = state.unlockedLevels.includes(id);
+            const cost = LEVEL_COSTS[id];
+            return `
+                <button onclick="handleLevelSelection('${id}')" class="p-6 bg-white rounded-3xl border-2 ${isUnlocked ? 'border-primary' : 'border-slate-100 opacity-60'} shadow-sm flex items-center justify-between">
+                    <div class="text-left"><p class="font-black text-slate-700 uppercase text-xs">${label}</p><p class="text-[9px] text-slate-400">${isUnlocked ? 'Desbloqueado' : 'Custo: ' + cost + ' Gemas'}</p></div>
+                    <span class="text-2xl">${isUnlocked ? icon : '🔒'}</span>
+                </button>
             `;
         }
 
-        window.setLevel = async (lvl) => {
-            if (state.unlocked.includes(lvl)) { state.level = lvl; saveData(); changeView('home'); }
+        window.handleLevelSelection = (lvlId) => {
+            if (state.unlockedLevels.includes(lvlId)) { state.level = lvlId; state.cardIdx = 0; changeView('flashcards'); }
             else {
-                const cost = GAME_DATA[lvl].cost;
-                if(state.gems >= cost) { state.gems -= cost; state.unlocked.push(lvl); await saveData(); setLevel(lvl); }
-                else alert("Gemas insuficientes!");
+                const cost = LEVEL_COSTS[lvlId];
+                if (state.gems >= cost) {
+                    document.getElementById('modal-text').textContent = `Queres desbloquear ${lvlId} por ${cost} gemas?`;
+                    document.getElementById('modal-container').classList.remove('hidden');
+                    document.getElementById('modal-confirm-btn').onclick = () => {
+                        state.gems -= cost; state.unlockedLevels.push(lvlId); 
+                        closeModal(); showToast("Nível Desbloqueado!"); updateUI(); saveData(); changeView('home');
+                    };
+                } else { showToast("Gemas insuficientes!"); changeView('store'); }
             }
         };
-        window.handleReset = async () => { if(confirm("Apagar tudo?")) { state.gems=0; state.xp=0; state.streak=0; state.unlocked=['basic']; state.level='basic'; await saveData(); changeView('home'); } };
-        window.updateTheme = (t) => { state.theme = t; applyTheme(t); saveData(); changeView('settings'); };
-        window.updateBackground = (bg) => { state.bgStyle = bg; applyBackground(bg); saveData(); changeView('settings'); };
-        window.navCard = (dir) => { const l=GAME_DATA[state.level].cards.length; state.cardIdx=(state.cardIdx+dir+l)%l; renderFlashcards(document.getElementById('app-viewport'), I18N[state.lang]); };
-        
+
+        function renderFlashcards(v) {
+            const card = GAME_DATA[state.level].cards[state.cardIdx];
+            v.innerHTML = `
+                <div class="view-animate text-center">
+                    <div id="card-box" class="card-container mb-8">
+                        <div class="card-inner">
+                            <div class="card-face"><span class="text-[10px] font-bold text-slate-400 mb-6 uppercase">${card.cat}</span><h3 class="text-3xl font-black text-primary px-4">${card.en}</h3></div>
+                            <div class="card-back card-face"><span class="text-[10px] font-bold text-white/50 mb-6 uppercase">Tradução</span><h3 class="text-2xl font-bold text-white px-4">${card.pt}</h3></div>
+                        </div>
+                    </div>
+                    <button id="btn-next" class="w-full py-4 bg-primary text-white rounded-2xl font-bold shadow-lg">Próximo (+10 XP)</button>
+                </div>
+            `;
+            document.getElementById('card-box').onclick = () => {
+                document.querySelector('.card-inner').classList.toggle('is-flipped');
+                const u = new SpeechSynthesisUtterance(card.en); u.lang = 'en-US'; window.speechSynthesis.speak(u);
+            };
+            document.getElementById('btn-next').onclick = () => {
+                state.xp += 10; state.cardIdx = (state.cardIdx + 1) % GAME_DATA[state.level].cards.length;
+                changeView('flashcards'); saveData();
+            };
+        }
+
+        function renderTutor(v) {
+            v.innerHTML = `
+                <div class="view-animate flex flex-col h-full" style="height: calc(100vh - 250px);">
+                    <div id="chat-win" class="flex-1 overflow-y-auto space-y-4 p-4 bg-white/50 rounded-3xl border border-slate-100 min-h-[350px]">
+                        ${state.chatMessages.map(m => `<div class="flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}"><div class="chat-bubble ${m.role === 'user' ? 'bubble-user' : 'bubble-bot'} shadow-sm">${m.text}</div></div>`).join('') || '<p class="text-center py-20 text-slate-400 text-sm">Pergunta algo sobre inglês!</p>'}
+                    </div>
+                    <div class="mt-4 flex space-x-2 bg-white p-2 rounded-2xl shadow-sm border">
+                        <input id="chat-in" type="text" placeholder="Escreve aqui..." class="flex-1 p-3 outline-none text-sm bg-transparent">
+                        <button id="btn-send" class="p-3 px-6 bg-primary text-white rounded-xl font-bold">⚡</button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('chat-win').scrollTop = 9999;
+            document.getElementById('btn-send').onclick = async () => {
+                const input = document.getElementById('chat-in');
+                const text = input.value.trim(); if (!text) return;
+                state.chatMessages.push({ role: 'user', text }); input.value = '';
+                renderTutor(document.getElementById('app-viewport'));
+                const response = await callGemini(text, "Foca na aprendizagem profissional.");
+                state.chatMessages.push({ role: 'bot', text: response });
+                renderTutor(document.getElementById('app-viewport'));
+            };
+        }
+
+        function renderGrammar(v) {
+            v.innerHTML = `
+                <div class="view-animate">
+                    <h2 class="text-2xl font-black mb-4">Analisar Frases ✨</h2>
+                    <textarea id="gram-in" placeholder="Escreve uma frase..." class="w-full h-32 p-4 rounded-3xl bg-white border outline-none text-sm mb-4 shadow-sm"></textarea>
+                    <button id="btn-gram" class="w-full py-4 bg-primary text-white rounded-2xl font-bold shadow-lg">Analisar ✨</button>
+                    <div id="gram-res" class="mt-6 ${state.grammarAnalysis ? '' : 'hidden'} pb-10">
+                        <div class="bg-white p-6 rounded-3xl border text-sm chat-bubble bubble-bot w-full leading-relaxed">${state.grammarAnalysis || ''}</div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('btn-gram').onclick = async () => {
+                const input = document.getElementById('gram-in').value; if (!input) return;
+                document.getElementById('btn-gram').innerHTML = '<div class="ai-loading border-t-white"></div>';
+                state.grammarAnalysis = await callGemini(`Corrige: "${input}".`);
+                renderGrammar(document.getElementById('app-viewport'));
+            };
+        }
+
+        function renderStore(v) {
+            v.innerHTML = `
+                <div class="view-animate">
+                    <h2 class="text-2xl font-black mb-6">Loja 💎</h2>
+                    <div class="bg-emerald-500 rounded-[2.5rem] p-8 text-white mb-6">
+                        <h3 class="font-bold text-lg mb-1">Gemas Grátis</h3>
+                        <button onclick="watchAdReward()" class="w-full py-4 bg-white text-emerald-600 rounded-2xl font-black text-sm mt-4 uppercase">Ver Vídeo (+50 💎)</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        window.watchAdReward = () => {
+            const overlay = document.getElementById('ad-overlay');
+            overlay.classList.remove('hidden');
+            setTimeout(() => {
+                overlay.classList.add('hidden');
+                state.gems += 50; showToast("+50 Gemas!"); updateUI(); saveData();
+            }, 5000);
+        };
+
+        function renderSettings(v) {
+            v.innerHTML = `
+                <div class="view-animate space-y-6">
+                    <h2 class="text-2xl font-black">Definições ⚙️</h2>
+                    <div class="bg-primary/5 p-6 rounded-3xl border">
+                        <p class="text-[10px] font-bold text-primary uppercase mb-2 tracking-widest">Conta Oficial</p>
+                        <p class="text-xs text-slate-500 mb-6">${state.user?.email || "Convidado Anónimo"}</p>
+                        
+                        <div class="space-y-2">
+                            <button onclick="changeView('terms')" class="w-full py-4 bg-white text-slate-700 rounded-2xl font-bold border text-sm">Ver Termos de Serviço</button>
+                            <button onclick="handleLogout()" class="w-full py-4 bg-rose-50 text-rose-600 rounded-2xl font-bold border border-rose-100 text-sm">Terminar Sessão</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderTerms(v) {
+            v.innerHTML = `
+                <div class="view-animate pb-10">
+                    <div class="flex items-center space-x-4 mb-6">
+                        <button onclick="changeView('settings')" class="text-primary font-bold">← Voltar</button>
+                        <h2 class="text-xl font-black">Termos de Serviço</h2>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-3xl border text-xs text-slate-600 space-y-4 leading-relaxed max-h-[60vh] overflow-y-auto">
+                        <p><strong>1. Aceitação:</strong> Ao usar o LingoQuest Pro, aceitas estes termos.</p>
+                        <p><strong>2. Serviço:</strong> O Tutor IA é baseado no Google Gemini e pode conter imprecisões.</p>
+                        <p><strong>3. Contas:</strong> É responsável por manter a segurança dos seus dados de acesso.</p>
+                        <p><strong>4. Gemas:</strong> Itens virtuais sem valor monetário real. Não reembolsáveis.</p>
+                        <p><strong>5. Conduta:</strong> Proibido o uso de linguagem abusiva no chat.</p>
+                        <p><strong>6. Responsabilidade:</strong> Não nos responsabilizamos por perdas de dados em contas de convidado.</p>
+                        <hr class="border-slate-100">
+                        <p class="text-[10px] italic">Última atualização: Janeiro 2026</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        window.handleLogout = () => { if(auth) signOut(auth); else location.reload(); };
+
+        window.showToast = (msg) => {
+            const t = document.getElementById('toast-notif');
+            if (t) { t.textContent = msg; t.classList.remove('hidden'); }
+            setTimeout(() => t && t.classList.add('hidden'), 3000);
+        };
+        window.closeModal = () => {
+            const m = document.getElementById('modal-container');
+            if (m) m.classList.add('hidden');
+        };
         function updateUI() {
-            const g = document.getElementById('ui-gems-count'); const t = document.getElementById('ui-current-lvl-tag'); const s = document.getElementById('ui-streak-count');
+            const g = document.getElementById('ui-gems');
+            const s = document.getElementById('ui-streak');
             if(g) g.textContent = state.gems;
-            if(t) t.textContent = I18N[state.lang][GAME_DATA[state.level].label_key];
             if(s) s.textContent = state.streak;
-            updateUIStrings();
+            document.body.className = `pb-32 ${state.theme} ${state.bgStyle}`;
         }
 
-        function updateUIStrings() {
-            const s = I18N[state.lang];
-            const ids = ['nav-txt-home', 'nav-txt-study', 'nav-txt-tutor', 'nav-txt-grammar', 'nav-txt-ranking'];
-            const keys = ['home', 'study', 'tutor', 'grammar', 'ranking'];
-            ids.forEach((id, i) => { const el = document.getElementById(id); if(el) el.textContent = s[keys[i]]; });
+        // PWA SW Activation
+        if ('serviceWorker' in navigator && (window.location.protocol === 'http:' || window.location.protocol === 'https:')) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service-worker.js').catch(err => console.debug('SW skipped', err));
+            });
         }
-
-        window.loginAnonymously = async () => { try { await window.signInAnonymously(window.auth); } catch(e){} };
-
-        window.onload = () => changeView('home');
     </script>
 </body>
 </html>
