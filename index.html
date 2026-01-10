@@ -1,16 +1,16 @@
-<!-- Chosen Palette: Dynamic (Blue, Emerald, Rose, Slate) -->
-<!-- Versão Final Pronta para Produção com Termos de Serviço Integrados -->
+<!-- Chosen Palette: Deep Dark & Electric Sky (Background: #020617, Primary: #0EA5E9, Accent: #10B981) -->
+<!-- Versão: Monetização AdMob + Dark Mode Visibilidade Máxima -->
 
 <!DOCTYPE html>
 <html lang="pt">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LingoQuest Pro: Legacy - Official Edition</title>
+    <title>LingoQuest Pro: Legacy - Ads Ready</title>
     
     <!-- PWA Essentials -->
     <link rel="manifest" href="./manifest.json">
-    <meta name="theme-color" id="theme-meta" content="#0284C7">
+    <meta name="theme-color" id="theme-meta" content="#020617">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3892/3892250.png">
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -18,145 +18,180 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
         
-        :root { --primary: #0284C7; --primary-light: #E0F2FE; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh; transition: all 0.3s ease; }
-        
-        .theme-blue { --primary: #0284C7; --primary-light: #E0F2FE; }
-        .theme-emerald { --primary: #059669; --primary-light: #D1FAE5; }
-        .theme-rose { --primary: #E11D48; --primary-light: #FFE4E6; }
-        .theme-slate { --primary: #334155; --primary-light: #F1F5F9; }
+        :root { 
+            --primary: #0EA5E9; 
+            --bg-deep: #020617; 
+            --card-dark: #1E293B;
+            --text-main: #F8FAFC;
+        }
 
-        .bg-style-default { background-color: #F8FAFC; color: #1E293B; }
-        .bg-style-cream { background-color: #FFFBEB; color: #451a03; }
-        .bg-style-dark { background-color: #0F172A; color: #F8FAFC; }
-
-        .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .bg-style-dark .glass { background: rgba(30, 41, 59, 0.85); border: 1px solid rgba(255, 255, 255, 0.05); }
-        .bg-style-dark header, .bg-style-dark nav { background: #0F172A; border-color: #1e293b; }
-        .bg-style-dark .bg-white { background-color: #1e293b; color: #f1f5f9; border-color: #334155; }
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: var(--bg-deep); 
+            color: var(--text-main);
+            min-height: 100vh; 
+            transition: all 0.3s ease; 
+            -webkit-tap-highlight-color: transparent;
+        }
         
+        .glass { 
+            background: rgba(30, 41, 59, 0.7); 
+            backdrop-filter: blur(12px); 
+            border: 1px solid rgba(255, 255, 255, 0.05); 
+        }
+
         .nav-active { color: var(--primary); transform: translateY(-4px); }
-        .card-inner { position: relative; width: 100%; height: 320px; transition: transform 0.6s; transform-style: preserve-3d; cursor: pointer; }
-        .card-inner.is-flipped { transform: rotateY(180deg); }
-        .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 32px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; border: 2px solid #E2E8F0; background: white; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); }
-        .card-back { background: var(--primary); color: white; transform: rotateY(180deg); border: none; }
         
-        .chat-bubble { max-width: 90%; padding: 14px 18px; border-radius: 24px; font-size: 14px; line-height: 1.6; white-space: pre-wrap; }
-        .bubble-bot { background: white; border: 1px solid #E2E8F0; color: #334155; }
-        .bg-style-dark .bubble-bot { background: #1e293b; color: white; border-color: #334155; }
-        .bubble-user { background: var(--primary); color: white; align-self: flex-end; }
+        /* Card Flip Design */
+        .card-inner { 
+            position: relative; 
+            width: 100%; 
+            height: 320px; 
+            transition: transform 0.6s; 
+            transform-style: preserve-3d; 
+            cursor: pointer; 
+        }
+        .card-inner.is-flipped { transform: rotateY(180deg); }
+        .card-face { 
+            position: absolute; 
+            width: 100%; 
+            height: 100%; 
+            backface-visibility: hidden; 
+            border-radius: 32px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 2rem; 
+            background: #1E293B; 
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+        .card-back { 
+            background: var(--primary); 
+            color: #020617; 
+            transform: rotateY(180deg); 
+            border: none; 
+        }
+        
+        /* Chat */
+        .chat-bubble { 
+            max-width: 90%; 
+            padding: 14px 18px; 
+            border-radius: 24px; 
+            font-size: 14px; 
+            line-height: 1.6; 
+            white-space: pre-wrap; 
+        }
+        .bubble-bot { background: #1E293B; color: #F8FAFC; border: 1px solid rgba(255,255,255,0.05); }
+        .bubble-user { background: var(--primary); color: #020617; align-self: flex-end; font-weight: 600; }
         
         .view-animate { animation: fadeInUp 0.4s ease-out; }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         
-        .ai-loading { display: inline-block; width: 18px; height: 18px; border: 3px solid rgba(0,0,0,0.1); border-radius: 50%; border-top-color: var(--primary); animation: spin 1s linear infinite; }
+        .ai-loading { display: inline-block; width: 18px; height: 18px; border: 3px solid rgba(255,255,255,0.1); border-radius: 50%; border-top-color: var(--primary); animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        .ad-simulation-overlay { position: fixed; inset: 0; z-index: 200; background: black; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; }
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); z-index: 300; display: flex; align-items: center; justify-content: center; padding: 1.5rem; }
+        /* Ads Placeholders */
+        .ad-banner-container { width: 100%; height: 60px; background: #0F172A; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; font-size: 9px; color: #475569; letter-spacing: 2px; }
+        .ad-simulation-overlay { position: fixed; inset: 0; z-index: 200; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; }
         
-        input { border: 1px solid #E2E8F0; padding: 12px 16px; border-radius: 12px; font-size: 14px; outline: none; transition: border 0.2s; }
-        input:focus { border-color: var(--primary); }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 300; display: flex; align-items: center; justify-content: center; padding: 1.5rem; }
+        
+        input { background: #0F172A !important; border: 1px solid #334155 !important; padding: 12px 16px; border-radius: 12px; font-size: 14px; color: white !important; outline: none; }
     </style>
 </head>
-<body class="pb-32 theme-blue bg-style-default">
+<body class="pb-32">
+
+    <!-- Espaço para Banner de Anúncio Superior -->
+    <div id="ad-banner-top" class="ad-banner-container">
+        ADMOB BANNER SPACE
+    </div>
 
     <!-- Modal de Confirmação -->
     <div id="modal-container" class="modal-overlay hidden">
-        <div class="bg-white rounded-[2.5rem] w-full max-w-sm p-8 shadow-2xl">
-            <h3 id="modal-title" class="text-xl font-black mb-2 text-slate-800">Confirmar</h3>
-            <p id="modal-text" class="text-sm text-slate-500 mb-8 leading-relaxed"></p>
+        <div class="bg-[#1E293B] rounded-[2.5rem] w-full max-w-sm p-8 shadow-2xl border border-white/5 text-center">
+            <h3 id="modal-title" class="text-xl font-black mb-2 text-white">Confirmar</h3>
+            <p id="modal-text" class="text-sm text-slate-400 mb-8 leading-relaxed"></p>
             <div class="flex space-x-3">
-                <button onclick="closeModal()" class="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-bold">Cancelar</button>
-                <button id="modal-confirm-btn" class="flex-1 py-4 bg-primary text-white rounded-2xl font-bold shadow-lg">Confirmar</button>
+                <button onclick="closeModal()" class="flex-1 py-4 bg-slate-800 text-slate-300 rounded-2xl font-bold">Cancelar</button>
+                <button id="modal-confirm-btn" class="flex-1 py-4 bg-sky-500 text-slate-900 rounded-2xl font-bold shadow-lg">Confirmar</button>
             </div>
         </div>
     </div>
 
-    <!-- Toast de Notificação -->
-    <div id="toast-notif" class="fixed top-8 left-1/2 -translate-x-1/2 z-[400] bg-slate-900 text-white px-6 py-3 rounded-full text-xs font-bold shadow-2xl hidden"></div>
+    <!-- Toast -->
+    <div id="toast-notif" class="fixed top-12 left-1/2 -translate-x-1/2 z-[400] bg-white text-slate-900 px-6 py-3 rounded-full text-xs font-bold shadow-2xl hidden"></div>
 
     <!-- Auth Screen -->
-    <div id="auth-screen" class="fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center p-8 overflow-y-auto">
+    <div id="auth-screen" class="fixed inset-0 z-[100] bg-[#020617] flex flex-col items-center justify-center p-8 overflow-y-auto">
         <div class="w-full max-w-sm text-center">
-            <div class="mb-6">
-                <svg class="w-12 h-12 mx-auto mb-4" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="50" cy="50" r="50" fill="#0284C7"/>
-                    <path d="M30 50L45 65L70 35" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+            <div class="mb-10">
+                <svg class="w-16 h-16 mx-auto mb-6" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="50" cy="50" r="50" fill="#0EA5E9"/>
+                    <path d="M30 50L45 65L70 35" stroke="#020617" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
-                <h1 class="text-3xl font-black text-[#0284C7] tracking-tighter mb-1">LingoQuest<br><span class="text-emerald-500 text-2xl uppercase tracking-widest">Legacy Pro</span></h1>
-                <p class="text-slate-400 text-xs italic">Cria a tua conta oficial.</p>
+                <h1 class="text-4xl font-black text-white tracking-tighter mb-2">LingoQuest<br><span class="text-emerald-500 text-3xl uppercase tracking-widest">Pro Edition</span></h1>
+                <p class="text-slate-500 text-sm italic">Aprende inglês técnico e domina o mercado.</p>
             </div>
 
-            <div class="flex bg-slate-100 p-1 rounded-xl mb-6">
-                <button onclick="toggleAuthMode('login')" id="tab-login" class="flex-1 py-2 text-xs font-bold rounded-lg bg-white shadow-sm transition-all">Login</button>
-                <button onclick="toggleAuthMode('register')" id="tab-register" class="flex-1 py-2 text-xs font-bold text-slate-400 transition-all">Registo</button>
+            <div class="flex bg-[#1E293B] p-1 rounded-2xl mb-8">
+                <button onclick="toggleAuthMode('login')" id="tab-login" class="flex-1 py-3 text-xs font-bold rounded-xl bg-slate-800 text-white shadow-sm transition-all">Login</button>
+                <button onclick="toggleAuthMode('register')" id="tab-register" class="flex-1 py-3 text-xs font-bold text-slate-500 transition-all">Registo</button>
             </div>
 
-            <div class="flex flex-col space-y-3 mb-6">
-                <input type="email" id="auth-email" placeholder="O teu e-mail" class="w-full">
-                <input type="password" id="auth-password" placeholder="Password (min. 6 carateres)" class="w-full">
-                <button id="btn-auth-submit" class="w-full py-4 bg-primary text-white rounded-2xl font-black text-sm uppercase shadow-lg shadow-sky-200">Entrar</button>
+            <div class="flex flex-col space-y-4 mb-8">
+                <input type="email" id="auth-email" placeholder="E-mail">
+                <input type="password" id="auth-password" placeholder="Password">
+                <button id="btn-auth-submit" class="w-full py-5 bg-sky-500 text-slate-900 rounded-2xl font-black text-sm uppercase shadow-xl active:scale-95 transition-all">Começar Agora</button>
             </div>
 
-            <div class="flex items-center my-6">
-                <div class="flex-1 h-px bg-slate-100"></div>
-                <span class="px-4 text-[10px] text-slate-300 font-bold uppercase">Ou continuar com</span>
-                <div class="flex-1 h-px bg-slate-100"></div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-3">
-                <button id="btn-login-google" class="py-3 px-4 bg-white border border-slate-200 rounded-xl flex items-center justify-center space-x-2 active:scale-95 transition-all">
-                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/action/google.svg" class="w-4 h-4">
-                    <span class="text-xs font-bold text-slate-600">Google</span>
-                </button>
-                <button id="btn-login-guest" class="py-3 px-4 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center space-x-2 active:scale-95 transition-all">
-                    <span class="text-lg">👤</span>
-                    <span class="text-xs font-bold text-slate-500">Convidado</span>
-                </button>
+            <div class="grid grid-cols-2 gap-4">
+                <button id="btn-login-google" class="py-4 px-4 bg-[#1E293B] border border-white/5 rounded-2xl flex items-center justify-center space-x-2 active:scale-95 transition-all text-white font-bold text-xs">Google</button>
+                <button id="btn-login-guest" class="py-4 px-4 bg-slate-800 rounded-2xl flex items-center justify-center space-x-2 active:scale-95 transition-all text-slate-300 font-bold text-xs">Convidado</button>
             </div>
             
-            <p id="auth-error-msg" class="mt-4 text-[10px] text-rose-500 font-bold hidden"></p>
+            <p id="auth-error-msg" class="mt-6 text-[10px] text-rose-500 font-bold hidden"></p>
         </div>
     </div>
 
     <!-- UI Principal -->
     <div id="main-ui" class="hidden">
-        <header class="p-6 flex justify-between items-center glass sticky top-0 z-40 border-b border-slate-100">
+        <header class="p-6 flex justify-between items-center glass sticky top-0 z-40 border-b border-white/5">
             <div id="header-logo-container" class="cursor-pointer">
-                <h1 class="text-xl font-extrabold text-primary tracking-tighter leading-none">LingoQuest <span class="text-emerald-500">Legacy</span></h1>
+                <h1 class="text-2xl font-black text-white tracking-tighter leading-none">LingoQuest <span class="text-emerald-500">Pro</span></h1>
                 <div class="flex items-center space-x-2 mt-1">
-                    <div class="bg-orange-500 text-white px-2 py-0.5 rounded text-[8px] font-bold">🔥 <span id="ui-streak">0</span></div>
-                    <span class="text-[8px] font-bold text-slate-400 uppercase tracking-widest italic">Play Store Version</span>
+                    <div class="bg-orange-600 text-white px-2 py-0.5 rounded text-[8px] font-bold">🔥 <span id="ui-streak">0</span></div>
                 </div>
             </div>
             <div class="flex items-center space-x-2">
-                <div class="bg-amber-100 px-3 py-1.5 rounded-2xl text-amber-600 font-extrabold text-sm border border-amber-200">
+                <div class="bg-amber-500/10 px-4 py-2 rounded-2xl text-amber-500 font-black text-sm border border-amber-500/20">
                     💎 <span id="ui-gems">0</span>
                 </div>
             </div>
         </header>
 
-        <main id="app-viewport" class="px-6 py-4 max-w-lg mx-auto min-h-[60vh]"></main>
+        <main id="app-viewport" class="px-6 py-6 max-w-lg mx-auto min-h-[60vh]"></main>
 
-        <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-6 py-4 flex justify-between items-center z-50 shadow-2xl">
+        <nav class="fixed bottom-0 left-0 right-0 bg-[#020617] border-t border-white/5 px-8 py-5 flex justify-between items-center z-50 shadow-2xl">
             <button onclick="changeView('home')" id="nav-home" class="flex flex-col items-center transition-all nav-active"><span class="text-2xl">🏠</span></button>
-            <button onclick="changeView('flashcards')" id="nav-flashcards" class="flex flex-col items-center transition-all text-slate-400"><span class="text-2xl">📚</span></button>
-            <button onclick="changeView('tutor')" id="nav-tutor" class="flex flex-col items-center transition-all text-slate-400"><span class="text-2xl">🤖</span></button>
-            <button onclick="changeView('grammar')" id="nav-grammar" class="flex flex-col items-center transition-all text-slate-400"><span class="text-2xl">✍️</span></button>
-            <button onclick="changeView('store')" id="nav-store" class="flex flex-col items-center transition-all text-slate-400"><span class="text-2xl">🏪</span></button>
-            <button onclick="changeView('settings')" id="nav-settings" class="flex flex-col items-center transition-all text-slate-400"><span class="text-2xl">⚙️</span></button>
+            <button onclick="changeView('flashcards')" id="nav-flashcards" class="flex flex-col items-center transition-all text-slate-600"><span class="text-2xl">📚</span></button>
+            <button onclick="changeView('tutor')" id="nav-tutor" class="flex flex-col items-center transition-all text-slate-600"><span class="text-2xl">🤖</span></button>
+            <button onclick="changeView('grammar')" id="nav-grammar" class="flex flex-col items-center transition-all text-slate-600"><span class="text-2xl">✍️</span></button>
+            <button onclick="changeView('store')" id="nav-store" class="flex flex-col items-center transition-all text-slate-600"><span class="text-2xl">🏪</span></button>
+            <button onclick="changeView('settings')" id="nav-settings" class="flex flex-col items-center transition-all text-slate-600"><span class="text-2xl">⚙️</span></button>
         </nav>
     </div>
 
-    <!-- Simulador de AdMob Overlay -->
+    <!-- Video Ad Simulation Overlay -->
     <div id="ad-overlay" class="ad-simulation-overlay hidden">
-        <div class="absolute top-6 right-6 text-xs font-bold text-white/40" id="ad-timer">Anúncio acaba em 5s...</div>
+        <div class="absolute top-10 right-10 text-xs font-bold text-white/30" id="ad-timer">Anúncio acaba em 5s...</div>
         <div class="text-center p-8">
-            <div class="text-6xl mb-6">📺</div>
-            <h3 class="text-xl font-black mb-2 uppercase">AdMob Video Ad</h3>
-            <div class="w-64 h-2 bg-white/10 rounded-full overflow-hidden">
-                <div id="ad-progress" class="bg-primary h-full w-0 transition-all duration-[5000ms] ease-linear"></div>
+            <div class="text-7xl mb-8">📺</div>
+            <h3 class="text-2xl font-black mb-4 uppercase tracking-tighter">Publicidade Premiada</h3>
+            <p class="text-sm text-slate-500 mb-10 italic max-w-xs mx-auto">Vê este vídeo para ganhares 50 gemas!</p>
+            <div class="w-64 h-1.5 bg-white/10 rounded-full overflow-hidden mx-auto">
+                <div id="ad-progress" class="bg-sky-500 h-full w-0 transition-all duration-[5000ms] ease-linear"></div>
             </div>
         </div>
     </div>
@@ -166,10 +201,15 @@
         import { getAuth, onAuthStateChanged, signInAnonymously, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // --- ADMOB REAL CONFIGURATION ---
+        // Quando tiveres os teus IDs do AdMob, substitui estes valores:
+        const ADMOB_PUBLISHER_ID = "ca-pub-XXXXXXXXXXXXXXXX"; 
+        const ADMOB_REWARDED_UNIT_ID = "ca-app-pub-XXXXXXXXXXXXXXXX/YYYYYYYYYY";
+
         // --- Firebase Config ---
         const envConfig = window.__firebase_config ? JSON.parse(window.__firebase_config) : null;
         const firebaseConfig = envConfig || { apiKey: "", authDomain: "", projectId: "", storageBucket: "", messagingSenderId: "", appId: "" };
-        const appId = typeof window.__app_id !== 'undefined' ? window.__app_id : 'lingoquest-legacy-pro';
+        const appId = typeof window.__app_id !== 'undefined' ? window.__app_id : 'lingoquest-pro-dark';
         
         const geminiApiKey = ""; 
         const geminiModel = "gemini-2.5-flash-preview-09-2025";
@@ -180,13 +220,13 @@
                 const app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
                 db = getFirestore(app);
-            } catch (e) { console.error("Firebase Init Error", e); }
+            } catch (e) { console.error("Firebase Init", e); }
         }
 
         let state = {
-            user: null, xp: 0, gems: 0, streak: 0, totalTimeMinutes: 0, lastLoginDate: null, sessionStartTime: Date.now(),
-            level: 'basic', view: 'home', theme: 'theme-blue', bgStyle: 'bg-style-default', cardIdx: 0,
-            chatMessages: [], grammarAnalysis: null, dailyMission: null, immersiveContext: null,
+            user: null, xp: 0, gems: 0, streak: 0, totalTimeMinutes: 0,
+            level: 'basic', view: 'home', theme: 'theme-blue', cardIdx: 0,
+            chatMessages: [], grammarAnalysis: null,
             unlockedLevels: ['basic'],
             achievements: { 'first_step': true, 'scholar': false, 'master': false }
         };
@@ -194,12 +234,12 @@
         const LEVEL_COSTS = { basic: 0, intermediate: 200, advanced_tech: 500 };
 
         const GAME_DATA = {
-            basic: { cards: [{en: "I am a teacher", pt: "Eu sou professor(a)", cat: "Pilar: Básico"}, {en: "Do you like coffee?", pt: "Gostas de café?", cat: "Pilar: Básico"}] },
-            intermediate: { cards: [{en: "I have finished my homework", pt: "Eu terminei o meu TPC", cat: "Tempo: Intermédio"}, {en: "If it rains, I'll stay at home", pt: "Se chover, ficarei em casa", cat: "Gramática: Intermédio"}] },
-            advanced_tech: { cards: [{en: "To charter", pt: "Fretar (Navio/Carga)", cat: "Avançado Técnico (PDF)"}, {en: "Toxic Gas", pt: "Gás Tóxico", cat: "Dangerous Cargo"}, {en: "To containerize", pt: "Conteinerizar", cat: "Verbos Marítimos"}] }
+            basic: { cards: [{en: "I am a teacher", pt: "Eu sou professor(a)", cat: "Básico"}, {en: "Do you like coffee?", pt: "Gostas de café?", cat: "Básico"}] },
+            intermediate: { cards: [{en: "I have finished my homework", pt: "Eu terminei o meu TPC", cat: "Intermédio"}] },
+            advanced_tech: { cards: [{en: "To charter", pt: "Fretar (Navio/Carga)", cat: "Avançado Técnico"}, {en: "Toxic Gas", pt: "Gás Tóxico", cat: "Dangerous Cargo"}] }
         };
 
-        // --- Auth Implementation ---
+        // --- Auth Logic ---
         let authMode = 'login';
         window.toggleAuthMode = (mode) => {
             authMode = mode;
@@ -208,19 +248,13 @@
             const tabRegister = document.getElementById('tab-register');
             if (mode === 'login') {
                 btn.textContent = 'Entrar';
-                tabLogin.className = 'flex-1 py-2 text-xs font-bold rounded-lg bg-white shadow-sm';
-                tabRegister.className = 'flex-1 py-2 text-xs font-bold text-slate-400';
+                tabLogin.className = 'flex-1 py-3 text-xs font-bold rounded-xl bg-slate-800 text-white';
+                tabRegister.className = 'flex-1 py-3 text-xs font-bold text-slate-500';
             } else {
                 btn.textContent = 'Criar Conta';
-                tabRegister.className = 'flex-1 py-2 text-xs font-bold rounded-lg bg-white shadow-sm';
-                tabLogin.className = 'flex-1 py-2 text-xs font-bold text-slate-400';
+                tabRegister.className = 'flex-1 py-3 text-xs font-bold rounded-xl bg-slate-800 text-white';
+                tabLogin.className = 'flex-1 py-3 text-xs font-bold text-slate-500';
             }
-        };
-
-        const showError = (msg) => {
-            const el = document.getElementById('auth-error-msg');
-            el.textContent = msg; el.classList.remove('hidden');
-            setTimeout(() => el.classList.add('hidden'), 5000);
         };
 
         if (auth) {
@@ -240,7 +274,7 @@
         document.getElementById('btn-auth-submit').onclick = async () => {
             const email = document.getElementById('auth-email').value;
             const password = document.getElementById('auth-password').value;
-            if (!email || password.length < 6) return showError("Dados inválidos.");
+            if (!email || password.length < 6) return showError("E-mail ou password inválida.");
             try {
                 if (authMode === 'login') await signInWithEmailAndPassword(auth, email, password);
                 else await createUserWithEmailAndPassword(auth, email, password);
@@ -262,7 +296,13 @@
             changeView('home');
         }
 
-        // --- Data Handling ---
+        const showError = (msg) => {
+            const el = document.getElementById('auth-error-msg');
+            el.textContent = msg; el.classList.remove('hidden');
+            setTimeout(() => el.classList.add('hidden'), 5000);
+        };
+
+        // --- Sync Handling ---
         async function syncUserData(uid) {
             if (!db) return;
             const userDocRef = doc(db, 'artifacts', appId, 'users', uid, 'profile', 'data');
@@ -273,7 +313,7 @@
                     Object.assign(state, rest); 
                     updateUI(); 
                 } else { saveData(); }
-            }, (err) => console.error("Sync Error", err));
+            });
         }
 
         async function saveData() {
@@ -281,21 +321,18 @@
             const userDocRef = doc(db, 'artifacts', appId, 'users', state.user.uid, 'profile', 'data');
             const dataToSave = { ...state };
             delete dataToSave.user; 
-            try { await setDoc(userDocRef, { ...dataToSave, updatedAt: new Date().toISOString() }, { merge: true }); } catch (e) { console.error("Save Error", e); }
+            try { await setDoc(userDocRef, { ...dataToSave, updatedAt: new Date().toISOString() }, { merge: true }); } catch (e) { }
         }
 
         // --- App Views ---
         window.changeView = (view) => {
             state.view = view;
             const viewport = document.getElementById('app-viewport');
-            
-            // Gestão visual da navegação
             document.querySelectorAll('nav button').forEach(b => {
-                b.classList.remove('nav-active'); b.classList.add('text-slate-400');
+                b.classList.remove('nav-active'); b.classList.add('text-slate-600');
             });
             const navBtn = document.getElementById(`nav-${view}`);
-            if (navBtn) { navBtn.classList.add('nav-active'); navBtn.classList.remove('text-slate-400'); }
-            
+            if (navBtn) { navBtn.classList.add('nav-active'); navBtn.classList.remove('text-slate-600'); }
             viewport.innerHTML = '';
             updateUI();
             
@@ -313,27 +350,27 @@
         function renderHome(v) {
             v.innerHTML = `
                 <div class="view-animate">
-                    <div class="bg-primary rounded-[2.5rem] p-8 text-white shadow-xl mb-6 relative overflow-hidden">
-                        <h2 class="text-2xl font-bold mb-1 italic">Olá, Explorador!</h2>
-                        <p class="text-white/70 text-[10px] uppercase font-bold tracking-widest">XP Total: ${state.xp}</p>
-                        <div class="mt-6 bg-white/20 h-2 rounded-full overflow-hidden"><div class="bg-white h-full" style="width: ${(state.xp % 100)}%"></div></div>
+                    <div class="bg-gradient-to-br from-sky-600 to-sky-900 rounded-[2.5rem] p-10 text-white shadow-2xl mb-8 relative overflow-hidden">
+                        <h2 class="text-3xl font-black mb-1 italic">Nível ${state.level.split('_')[0].toUpperCase()}</h2>
+                        <p class="text-sky-300 text-[10px] uppercase font-bold tracking-widest">XP: ${state.xp} | Mantém a chama acesa!</p>
+                        <div class="mt-8 bg-black/30 h-1.5 rounded-full overflow-hidden"><div class="bg-emerald-400 h-full shadow-[0_0_10px_#10B981]" style="width: ${(state.xp % 100)}%"></div></div>
                     </div>
-                    <div class="grid grid-cols-1 gap-4">
-                        ${renderLevelBtn('basic', 'Básico', '🌱')}
-                        ${renderLevelBtn('intermediate', 'Intermédio', '🏆')}
-                        ${renderLevelBtn('advanced_tech', 'Avançado Técnico ✨', '🚢')}
+                    <div class="grid grid-cols-1 gap-5">
+                        ${renderLevelBtn('basic', '🌱', 'Básico')}
+                        ${renderLevelBtn('intermediate', '🏆', 'Intermédio')}
+                        ${renderLevelBtn('advanced_tech', '🚢', 'Avançado Técnico ✨')}
                     </div>
                 </div>
             `;
         }
 
-        function renderLevelBtn(id, label, icon) {
+        function renderLevelBtn(id, icon, label) {
             const isUnlocked = state.unlockedLevels.includes(id);
             const cost = LEVEL_COSTS[id];
             return `
-                <button onclick="handleLevelSelection('${id}')" class="p-6 bg-white rounded-3xl border-2 ${isUnlocked ? 'border-primary' : 'border-slate-100 opacity-60'} shadow-sm flex items-center justify-between">
-                    <div class="text-left"><p class="font-black text-slate-700 uppercase text-xs">${label}</p><p class="text-[9px] text-slate-400">${isUnlocked ? 'Desbloqueado' : 'Custo: ' + cost + ' Gemas'}</p></div>
-                    <span class="text-2xl">${isUnlocked ? icon : '🔒'}</span>
+                <button onclick="handleLevelSelection('${id}')" class="p-8 bg-[#1E293B] rounded-[2rem] border border-white/5 ${isUnlocked ? 'border-sky-500/20' : 'opacity-60'} flex items-center justify-between">
+                    <div class="text-left"><p class="font-black text-white uppercase text-xs tracking-wider">${label}</p><p class="text-[9px] text-slate-500 mt-1">${isUnlocked ? 'PRONTO A ESTUDAR' : 'BLOQUEADO: ' + cost + ' 💎'}</p></div>
+                    <span class="text-3xl">${isUnlocked ? icon : '🔒'}</span>
                 </button>
             `;
         }
@@ -343,13 +380,13 @@
             else {
                 const cost = LEVEL_COSTS[lvlId];
                 if (state.gems >= cost) {
-                    document.getElementById('modal-text').textContent = `Queres desbloquear ${lvlId} por ${cost} gemas?`;
+                    document.getElementById('modal-text').textContent = `Desejas desbloquear o curso por ${cost} gemas?`;
                     document.getElementById('modal-container').classList.remove('hidden');
                     document.getElementById('modal-confirm-btn').onclick = () => {
                         state.gems -= cost; state.unlockedLevels.push(lvlId); 
-                        closeModal(); showToast("Nível Desbloqueado!"); updateUI(); saveData(); changeView('home');
+                        closeModal(); showToast("Curso Desbloqueado! 🔓"); updateUI(); saveData(); changeView('home');
                     };
-                } else { showToast("Gemas insuficientes!"); changeView('store'); }
+                } else { showToast("Gemas insuficientes! Assiste a um vídeo."); changeView('store'); }
             }
         };
 
@@ -357,17 +394,18 @@
             const card = GAME_DATA[state.level].cards[state.cardIdx];
             v.innerHTML = `
                 <div class="view-animate text-center">
-                    <div id="card-box" class="card-container mb-8">
+                    <div id="card-box" class="card-container mb-10">
                         <div class="card-inner">
-                            <div class="card-face"><span class="text-[10px] font-bold text-slate-400 mb-6 uppercase">${card.cat}</span><h3 class="text-3xl font-black text-primary px-4">${card.en}</h3></div>
-                            <div class="card-back card-face"><span class="text-[10px] font-bold text-white/50 mb-6 uppercase">Tradução</span><h3 class="text-2xl font-bold text-white px-4">${card.pt}</h3></div>
+                            <div class="card-face"><span class="text-[10px] font-bold text-sky-500 mb-8 uppercase tracking-widest">${card.cat}</span><h3 class="text-4xl font-black text-white px-4">${card.en}</h3><p class="mt-10 text-slate-500 text-[10px]">Toca para traduzir</p></div>
+                            <div class="card-back card-face"><span class="text-[10px] font-bold text-slate-900 mb-8 uppercase tracking-widest">Português</span><h3 class="text-3xl font-bold text-slate-900 px-4">${card.pt}</h3></div>
                         </div>
                     </div>
-                    <button id="btn-next" class="w-full py-4 bg-primary text-white rounded-2xl font-bold shadow-lg">Próximo (+10 XP)</button>
+                    <button id="btn-next" class="w-full py-5 bg-sky-500 text-slate-900 rounded-3xl font-black shadow-lg">PRÓXIMO (+10 XP)</button>
                 </div>
             `;
             document.getElementById('card-box').onclick = () => {
-                document.querySelector('.card-inner').classList.toggle('is-flipped');
+                const inner = document.querySelector('.card-inner');
+                if (inner) inner.classList.toggle('is-flipped');
                 const u = new SpeechSynthesisUtterance(card.en); u.lang = 'en-US'; window.speechSynthesis.speak(u);
             };
             document.getElementById('btn-next').onclick = () => {
@@ -376,25 +414,61 @@
             };
         }
 
-        function renderTutor(v) {
+        function renderStore(v) {
             v.innerHTML = `
-                <div class="view-animate flex flex-col h-full" style="height: calc(100vh - 250px);">
-                    <div id="chat-win" class="flex-1 overflow-y-auto space-y-4 p-4 bg-white/50 rounded-3xl border border-slate-100 min-h-[350px]">
-                        ${state.chatMessages.map(m => `<div class="flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}"><div class="chat-bubble ${m.role === 'user' ? 'bubble-user' : 'bubble-bot'} shadow-sm">${m.text}</div></div>`).join('') || '<p class="text-center py-20 text-slate-400 text-sm">Pergunta algo sobre inglês!</p>'}
-                    </div>
-                    <div class="mt-4 flex space-x-2 bg-white p-2 rounded-2xl shadow-sm border">
-                        <input id="chat-in" type="text" placeholder="Escreve aqui..." class="flex-1 p-3 outline-none text-sm bg-transparent">
-                        <button id="btn-send" class="p-3 px-6 bg-primary text-white rounded-xl font-bold">⚡</button>
+                <div class="view-animate">
+                    <h2 class="text-3xl font-black mb-8 text-center text-white">Loja de Gemas 💎</h2>
+                    <div class="bg-gradient-to-br from-emerald-600 to-emerald-900 rounded-[2.5rem] p-10 text-white shadow-2xl mb-8 relative overflow-hidden">
+                        <div class="relative z-10">
+                            <h3 class="font-black text-2xl mb-2 text-white">Gemas Grátis</h3>
+                            <p class="text-xs opacity-70 mb-8 italic">Vê o anúncio para apoiar o teu tutor!</p>
+                            <button onclick="watchAdReward()" class="w-full py-5 bg-white text-emerald-900 rounded-3xl font-black text-sm uppercase shadow-2xl active:scale-95 transition-all">Ver Anúncio (+50 💎)</button>
+                        </div>
+                        <div class="absolute -right-6 -bottom-6 text-9xl opacity-10 rotate-12">💎</div>
                     </div>
                 </div>
             `;
-            document.getElementById('chat-win').scrollTop = 9999;
+        }
+
+        window.watchAdReward = () => {
+            const overlay = document.getElementById('ad-overlay');
+            const progress = document.getElementById('ad-progress');
+            if (overlay) {
+                overlay.classList.remove('hidden');
+                progress.style.width = '100%';
+                
+                // Em produção, aqui chamarias o AdMob real via plugin Cordova ou Web SDK
+                setTimeout(() => {
+                    overlay.classList.add('hidden');
+                    progress.style.width = '0%';
+                    state.gems += 50; 
+                    showToast("Sucesso! +50 Gemas na conta. 💎"); 
+                    updateUI(); 
+                    saveData();
+                }, 5000);
+            }
+        };
+
+        function renderTutor(v) {
+            v.innerHTML = `
+                <div class="view-animate flex flex-col h-full" style="height: calc(100vh - 280px);">
+                    <div id="chat-win" class="flex-1 overflow-y-auto space-y-4 p-4 bg-[#1E293B]/30 rounded-[2.5rem] border border-white/5 min-h-[350px]">
+                        ${state.chatMessages.map(m => `<div class="flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}"><div class="chat-bubble ${m.role === 'user' ? 'bubble-user' : 'bubble-bot'} shadow-lg animate-fade-in">${m.text}</div></div>`).join('') || '<p class="text-center py-24 text-slate-600 text-xs italic">Conversa em inglês com o Tutor Pro.</p>'}
+                    </div>
+                    <div class="mt-6 flex space-x-3 bg-[#1E293B] p-3 rounded-2xl shadow-xl border border-white/5">
+                        <input id="chat-in" type="text" placeholder="Diz algo..." class="flex-1 p-4 bg-transparent border-none text-sm">
+                        <button id="btn-send" class="p-4 px-8 bg-sky-500 text-slate-900 rounded-xl font-black shadow-lg">Enviar</button>
+                    </div>
+                </div>
+            `;
+            const win = document.getElementById('chat-win');
+            if (win) win.scrollTop = 9999;
             document.getElementById('btn-send').onclick = async () => {
                 const input = document.getElementById('chat-in');
                 const text = input.value.trim(); if (!text) return;
                 state.chatMessages.push({ role: 'user', text }); input.value = '';
                 renderTutor(document.getElementById('app-viewport'));
-                const response = await callGemini(text, "Foca na aprendizagem profissional.");
+                const response = await callGemini(text, "Responde de forma concisa em Português sobre Inglês.");
                 state.chatMessages.push({ role: 'bot', text: response });
                 renderTutor(document.getElementById('app-viewport'));
             };
@@ -403,54 +477,32 @@
         function renderGrammar(v) {
             v.innerHTML = `
                 <div class="view-animate">
-                    <h2 class="text-2xl font-black mb-4">Analisar Frases ✨</h2>
-                    <textarea id="gram-in" placeholder="Escreve uma frase..." class="w-full h-32 p-4 rounded-3xl bg-white border outline-none text-sm mb-4 shadow-sm"></textarea>
-                    <button id="btn-gram" class="w-full py-4 bg-primary text-white rounded-2xl font-bold shadow-lg">Analisar ✨</button>
-                    <div id="gram-res" class="mt-6 ${state.grammarAnalysis ? '' : 'hidden'} pb-10">
-                        <div class="bg-white p-6 rounded-3xl border text-sm chat-bubble bubble-bot w-full leading-relaxed">${state.grammarAnalysis || ''}</div>
+                    <h2 class="text-3xl font-black mb-6">Correção IA ✨</h2>
+                    <textarea id="gram-in" placeholder="Ex: I has a ship..." class="w-full h-40 p-6 rounded-[2.5rem] bg-[#1E293B] border border-white/5 outline-none text-sm mb-6 text-white focus:border-sky-500 transition-all"></textarea>
+                    <button id="btn-gram" class="w-full py-5 bg-sky-500 text-slate-900 rounded-3xl font-black shadow-lg uppercase">Analisar Erros</button>
+                    <div id="gram-res" class="mt-10 ${state.grammarAnalysis ? '' : 'hidden'} pb-12">
+                        <div class="bg-[#1E293B] p-8 rounded-[2.5rem] border border-white/5 text-sm text-slate-300 leading-relaxed shadow-2xl">${state.grammarAnalysis || ''}</div>
                     </div>
                 </div>
             `;
             document.getElementById('btn-gram').onclick = async () => {
                 const input = document.getElementById('gram-in').value; if (!input) return;
-                document.getElementById('btn-gram').innerHTML = '<div class="ai-loading border-t-white"></div>';
+                document.getElementById('btn-gram').innerHTML = '<div class="ai-loading"></div>';
                 state.grammarAnalysis = await callGemini(`Corrige: "${input}".`);
                 renderGrammar(document.getElementById('app-viewport'));
             };
         }
 
-        function renderStore(v) {
-            v.innerHTML = `
-                <div class="view-animate">
-                    <h2 class="text-2xl font-black mb-6">Loja 💎</h2>
-                    <div class="bg-emerald-500 rounded-[2.5rem] p-8 text-white mb-6">
-                        <h3 class="font-bold text-lg mb-1">Gemas Grátis</h3>
-                        <button onclick="watchAdReward()" class="w-full py-4 bg-white text-emerald-600 rounded-2xl font-black text-sm mt-4 uppercase">Ver Vídeo (+50 💎)</button>
-                    </div>
-                </div>
-            `;
-        }
-
-        window.watchAdReward = () => {
-            const overlay = document.getElementById('ad-overlay');
-            overlay.classList.remove('hidden');
-            setTimeout(() => {
-                overlay.classList.add('hidden');
-                state.gems += 50; showToast("+50 Gemas!"); updateUI(); saveData();
-            }, 5000);
-        };
-
         function renderSettings(v) {
             v.innerHTML = `
-                <div class="view-animate space-y-6">
-                    <h2 class="text-2xl font-black">Definições ⚙️</h2>
-                    <div class="bg-primary/5 p-6 rounded-3xl border">
-                        <p class="text-[10px] font-bold text-primary uppercase mb-2 tracking-widest">Conta Oficial</p>
-                        <p class="text-xs text-slate-500 mb-6">${state.user?.email || "Convidado Anónimo"}</p>
-                        
-                        <div class="space-y-2">
-                            <button onclick="changeView('terms')" class="w-full py-4 bg-white text-slate-700 rounded-2xl font-bold border text-sm">Ver Termos de Serviço</button>
-                            <button onclick="handleLogout()" class="w-full py-4 bg-rose-50 text-rose-600 rounded-2xl font-bold border border-rose-100 text-sm">Terminar Sessão</button>
+                <div class="view-animate space-y-8">
+                    <h2 class="text-3xl font-black">Configurações ⚙️</h2>
+                    <div class="bg-[#1E293B] p-8 rounded-[2.5rem] border border-white/5">
+                        <p class="text-[10px] font-black text-sky-500 uppercase mb-4 tracking-widest">Perfil Ativo</p>
+                        <p class="text-sm text-slate-400 mb-8 font-medium">${state.user?.email || "Convidado Anon"}</p>
+                        <div class="space-y-3">
+                            <button onclick="changeView('terms')" class="w-full py-5 bg-slate-800 text-white rounded-2xl font-bold text-sm">Privacidade e Termos</button>
+                            <button onclick="handleLogout()" class="w-full py-5 bg-rose-950/20 text-rose-500 rounded-2xl font-bold text-sm border border-rose-900/30">Terminar Sessão</button>
                         </div>
                     </div>
                 </div>
@@ -459,50 +511,47 @@
 
         function renderTerms(v) {
             v.innerHTML = `
-                <div class="view-animate pb-10">
-                    <div class="flex items-center space-x-4 mb-6">
-                        <button onclick="changeView('settings')" class="text-primary font-bold">← Voltar</button>
-                        <h2 class="text-xl font-black">Termos de Serviço</h2>
+                <div class="view-animate pb-12">
+                    <div class="flex items-center space-x-4 mb-8">
+                        <button onclick="changeView('settings')" class="text-sky-500 font-black text-lg">←</button>
+                        <h2 class="text-2xl font-black">Termos de Serviço</h2>
                     </div>
-                    
-                    <div class="bg-white p-6 rounded-3xl border text-xs text-slate-600 space-y-4 leading-relaxed max-h-[60vh] overflow-y-auto">
-                        <p><strong>1. Aceitação:</strong> Ao usar o LingoQuest Pro, aceitas estes termos.</p>
-                        <p><strong>2. Serviço:</strong> O Tutor IA é baseado no Google Gemini e pode conter imprecisões.</p>
-                        <p><strong>3. Contas:</strong> É responsável por manter a segurança dos seus dados de acesso.</p>
-                        <p><strong>4. Gemas:</strong> Itens virtuais sem valor monetário real. Não reembolsáveis.</p>
-                        <p><strong>5. Conduta:</strong> Proibido o uso de linguagem abusiva no chat.</p>
-                        <p><strong>6. Responsabilidade:</strong> Não nos responsabilizamos por perdas de dados em contas de convidado.</p>
-                        <hr class="border-slate-100">
-                        <p class="text-[10px] italic">Última atualização: Janeiro 2026</p>
+                    <div class="bg-[#1E293B] p-8 rounded-[2.5rem] border border-white/5 text-xs text-slate-400 space-y-6 overflow-y-auto">
+                        <p><strong>Gemas:</strong> Item virtual sem valor monetário. Ganhas através de anúncios AdMob.</p>
+                        <p><strong>Ads:</strong> Os anúncios premiados financiam os custos de manutenção da IA Tutor.</p>
+                        <p><strong>Privacidade:</strong> Não vendemos os teus dados de estudo.</p>
                     </div>
                 </div>
             `;
         }
 
+        // --- Helpers ---
         window.handleLogout = () => { if(auth) signOut(auth); else location.reload(); };
-
         window.showToast = (msg) => {
             const t = document.getElementById('toast-notif');
             if (t) { t.textContent = msg; t.classList.remove('hidden'); }
             setTimeout(() => t && t.classList.add('hidden'), 3000);
         };
-        window.closeModal = () => {
-            const m = document.getElementById('modal-container');
-            if (m) m.classList.add('hidden');
-        };
+        window.closeModal = () => { document.getElementById('modal-container').classList.add('hidden'); };
         function updateUI() {
             const g = document.getElementById('ui-gems');
             const s = document.getElementById('ui-streak');
             if(g) g.textContent = state.gems;
             if(s) s.textContent = state.streak;
-            document.body.className = `pb-32 ${state.theme} ${state.bgStyle}`;
         }
 
-        // PWA SW Activation
+        async function callGemini(prompt, sys) {
+            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${geminiApiKey}`;
+            const payload = { contents: [{ parts: [{ text: prompt }] }], systemInstruction: { parts: [{ text: "Tutor LingoQuest Pro. " + sys }] } };
+            try {
+                const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                const data = await response.json();
+                return data.candidates?.[0]?.content?.parts?.[0]?.text || "Erro no servidor.";
+            } catch (e) { return "Sem internet."; }
+        }
+
         if ('serviceWorker' in navigator && (window.location.protocol === 'http:' || window.location.protocol === 'https:')) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./service-worker.js').catch(err => console.debug('SW skipped', err));
-            });
+            window.addEventListener('load', () => { navigator.serviceWorker.register('./service-worker.js').catch(() => {}); });
         }
     </script>
 </body>
