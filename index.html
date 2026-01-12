@@ -3,136 +3,140 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LingoQuest Pro - Legacy Edition</title>
+    <title>LingoQuest Pro: Legacy</title>
     
-    <!-- Otimização de Conexão (Acelera o carregamento de recursos externos) -->
+    <!-- Otimização de Rede Crítica -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     
-    <!-- PWA Essentials -->
+    <!-- Pré-carregamento da Fonte Principal -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&display=swap" as="style">
+    
+    <!-- PWA -->
     <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#020617">
     
-    <!-- Tailwind via CDN otimizado -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
     
+    <!-- Estilos Críticos (Carregamento Imediato) -->
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+        :root { --bg: #020617; --primary: #0ea5e9; }
+        body { background-color: var(--bg); margin: 0; font-family: sans-serif; }
         
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #020617;
-            color: #f8fafc;
-            margin: 0;
-            overflow-x: hidden;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        /* Ecrã de carregamento crítico (CSS puro para ser instantâneo) */
         #critical-loader {
-            position: fixed;
-            inset: 0;
-            background: #020617;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            transition: opacity 0.3s ease;
+            position: fixed; inset: 0; background: var(--bg);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 10000; transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid rgba(14, 165, 233, 0.1);
-            border-top: 4px solid #0ea5e9;
+        .loader-ring {
+            width: 48px; height: 48px;
+            border: 3px solid rgba(14, 165, 233, 0.1);
+            border-top: 3px solid var(--primary);
             border-radius: 50%;
-            animation: spin 1s linear infinite;
+            animation: spin 0.8s linear infinite;
         }
 
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* Ocultar conteúdo até estar pronto */
+        #app { opacity: 0; transition: opacity 0.3s ease; }
+        #app.ready { opacity: 1; }
 
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
         .bg-pattern {
             background-image: radial-gradient(#1e293b 0.8px, transparent 0.8px);
             background-size: 24px 24px;
         }
-
-        /* Otimizações de performance visual */
-        .glass-header {
-            background: rgba(15, 23, 42, 0.85);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .card-gradient { background: linear-gradient(135deg, #0369a1 0%, #312e81 100%); }
-        .premium-gradient { background: linear-gradient(135deg, #4338ca 0%, #581c87 100%); }
-        
-        .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom); }
-        
-        /* Previne lag de scroll em listas longas */
-        #chat-history {
-            will-change: scroll-position;
-            scroll-behavior: smooth;
-        }
     </style>
+
+    <!-- Fontes Secundárias -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
 </head>
 <body>
 
-    <!-- Ecrã de carregamento instantâneo -->
     <div id="critical-loader">
-        <div class="spinner"></div>
-        <p style="margin-top: 15px; color: #0ea5e9; font-weight: 800; font-size: 10px; letter-spacing: 2px; text-transform: uppercase;">A Ligar...</p>
+        <div class="loader-ring"></div>
+        <div style="margin-top: 20px; color: var(--primary); font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 11px; letter-spacing: 3px; text-transform: uppercase;">A Ligar...</div>
     </div>
 
     <div id="app" class="min-h-screen flex flex-col items-center"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signInAnonymously, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken, signInWithPopup, GoogleAuthProvider, signOut, signInWithRedirect, getRedirectResult } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, query, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // Inicialização Global
         const firebaseConfig = JSON.parse(__firebase_config);
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'lingoquest-pro-v2';
-        const apiKey = ""; 
+        const appId = (typeof __app_id !== 'undefined' && __app_id) ? __app_id : 'lingoquest-pro-v2';
+        const apiKey = ""; // Gerido pelo ambiente
         const GEMINI_MODEL = "gemini-2.5-flash-preview-09-2025";
 
         let state = {
-            user: null,
+            user: null, 
             view: 'home',
-            userData: {
-                gems: 100, xp: 0, streak: 1, level: 'basic', isPremium: false, unlockedLevels: ['basic']
-            },
-            messages: [],
+            userData: { gems: 100, xp: 0, streak: 1, level: 'basic', isPremium: false, unlockedLevels: ['basic'] },
+            messages: [], 
             aiLoading: false
         };
 
         const appContainer = document.getElementById('app');
         const loader = document.getElementById('critical-loader');
 
-        // Autenticação com carregamento escondido
+        // Referências para cancelamento de ouvintes
+        let unsubMessages = null;
+        let unsubProfile = null;
+
+        // REGRA 3: Lógica de Autenticação Robusta
+        const startAuth = async () => {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else if (!auth.currentUser) {
+                    await signInAnonymously(auth);
+                }
+            } catch (err) {
+                console.error("Erro no processo de Auth:", err);
+            }
+        };
+
+        // Ouvinte de Estado de Autenticação
         onAuthStateChanged(auth, async (user) => {
+            // Limpar ouvintes anteriores se o utilizador mudar
+            if (unsubMessages) unsubMessages();
+            if (unsubProfile) unsubProfile();
+
             state.user = user;
+            
             if (user) {
+                // Sincronizar perfil e depois iniciar chat
                 await syncUserProfile();
                 setupRealtimeMessages();
+                
+                // Mostrar UI
+                requestAnimationFrame(() => {
+                    render();
+                    appContainer.classList.add('ready');
+                    loader.style.opacity = '0';
+                    setTimeout(() => loader.style.display = 'none', 400);
+                });
+            } else {
+                // Se não houver utilizador, forçar auth
+                render();
+                loader.style.opacity = '0';
+                setTimeout(() => loader.style.display = 'none', 400);
             }
-            hideLoader();
-            render();
         });
 
-        function hideLoader() {
-            loader.style.opacity = '0';
-            setTimeout(() => loader.style.display = 'none', 300);
-        }
-
         async function syncUserProfile() {
+            if (!state.user) return;
+            // REGRA 1: Caminho privado /artifacts/{appId}/users/{userId}/{collectionName}
             const userRef = doc(db, 'artifacts', appId, 'users', state.user.uid, 'profile', 'data');
             try {
                 const docSnap = await getDoc(userRef);
@@ -141,16 +145,26 @@
                 } else {
                     await setDoc(userRef, state.userData);
                 }
-            } catch (e) { console.error("Erro ao sincronizar perfil"); }
+            } catch (e) {
+                console.error("Erro ao carregar perfil:", e);
+            }
         }
 
         function setupRealtimeMessages() {
+            if (!state.user) return;
+            // REGRA 1: Caminho público /artifacts/{appId}/public/data/{collectionName}
             const msgCol = collection(db, 'artifacts', appId, 'public', 'data', 'messages');
-            onSnapshot(query(msgCol), (snap) => {
+            
+            // REGRA 2: Apenas consultas simples
+            unsubMessages = onSnapshot(msgCol, (snap) => {
                 const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                // Ordenação em memória para respeitar a Regra 2
                 state.messages = list.sort((a, b) => (a.timestamp?.seconds || 0) - (b.timestamp?.seconds || 0));
                 if (state.view === 'tutor') render();
-            }, (err) => console.warn("Aguardando permissões..."));
+            }, (err) => {
+                // Se houver erro de permissão, tentamos re-autenticar silenciosamente
+                console.error("Erro no ouvinte Firestore:", err);
+            });
         }
 
         async function callGemini(prompt, system) {
@@ -165,17 +179,19 @@
                 });
                 const data = await response.json();
                 return data.candidates?.[0]?.content?.parts?.[0]?.text;
-            } catch (e) { return "O Tutor está ocupado. Tenta novamente."; }
+            } catch (e) { return "Tutor ocupado. Tenta novamente mais tarde."; }
         }
 
-        // Eventos Globais
+        // Funções de Interface
         window.changeView = (v) => { state.view = v; render(); };
-        window.loginWithGoogle = async () => { try { await signInWithPopup(auth, new GoogleAuthProvider()); } catch(e){} };
-        window.loginAsGuest = async () => { try { await signInAnonymously(auth); } catch(e){} };
+        window.loginWithGoogle = () => signInWithPopup(auth, new GoogleAuthProvider());
+        window.loginAsGuest = () => signInAnonymously(auth);
         window.handleLogout = () => signOut(auth);
 
         window.handleLevel = async (lvl) => {
+            if (!state.user) return;
             const costs = { basic: 0, intermediate: 200, advanced_tech: 500 };
+            
             if (state.userData.isPremium || state.userData.unlockedLevels.includes(lvl)) {
                 state.userData.level = lvl;
                 state.view = 'tutor';
@@ -183,46 +199,54 @@
                 state.userData.gems -= costs[lvl];
                 state.userData.unlockedLevels.push(lvl);
                 state.userData.level = lvl;
-                await updateDoc(doc(db, 'artifacts', appId, 'users', state.user.uid, 'profile', 'data'), state.userData);
+                const userRef = doc(db, 'artifacts', appId, 'users', state.user.uid, 'profile', 'data');
+                await updateDoc(userRef, state.userData);
                 state.view = 'tutor';
-            } else {
-                state.view = 'store';
+            } else { 
+                state.view = 'store'; 
             }
             render();
         };
 
         window.sendMsg = async (e) => {
             e.preventDefault();
+            if (!state.user) return;
             const input = document.getElementById('chat-input');
             const text = input.value.trim();
             if (!text || state.aiLoading) return;
 
             input.value = '';
             const msgCol = collection(db, 'artifacts', appId, 'public', 'data', 'messages');
-            await addDoc(msgCol, {
-                text,
-                userId: state.user.uid,
-                username: state.user.isAnonymous ? `Convidado ${state.user.uid.slice(0,4)}` : state.user.displayName || 'Aluno',
-                timestamp: serverTimestamp()
-            });
+            
+            try {
+                await addDoc(msgCol, {
+                    text, userId: state.user.uid,
+                    username: state.user.isAnonymous ? `Convidado ${state.user.uid.slice(0,4)}` : state.user.displayName || 'Aluno',
+                    timestamp: serverTimestamp()
+                });
 
-            state.aiLoading = true;
-            render();
-
-            const resp = await callGemini(text, `És o Tutor LingoQuest. O aluno está no nível ${state.userData.level}. Responde brevemente em Inglês e traduz.`);
-            await addDoc(msgCol, {
-                text: resp,
-                userId: 'ai',
-                username: 'Tutor Gemini ✨',
-                timestamp: serverTimestamp(),
-                isAi: true
-            });
-
-            state.aiLoading = false;
-            render();
+                state.aiLoading = true; 
+                render();
+                
+                const resp = await callGemini(text, `És o Tutor LingoQuest. O aluno está no nível ${state.userData.level}. Responde em inglês e dá uma breve tradução em português.`);
+                
+                await addDoc(msgCol, { 
+                    text: resp, 
+                    userId: 'ai', 
+                    username: 'Tutor Gemini ✨', 
+                    timestamp: serverTimestamp(), 
+                    isAi: true 
+                });
+            } catch (err) {
+                console.error("Erro ao enviar mensagem:", err);
+            } finally {
+                state.aiLoading = false; 
+                render();
+            }
         };
 
         window.buyItem = async (type, val) => {
+            if (!state.user) return;
             const userRef = doc(db, 'artifacts', appId, 'users', state.user.uid, 'profile', 'data');
             if (type === 'gems') state.userData.gems += val;
             if (type === 'premium') { state.userData.isPremium = true; state.userData.gems += 1000; }
@@ -234,18 +258,18 @@
             if (!state.user) {
                 appContainer.innerHTML = `
                     <div class="h-screen flex items-center justify-center p-6 bg-pattern w-full animate-fade-in">
-                        <div class="w-full max-w-sm bg-[#0f172a] border border-white/5 p-10 rounded-[3rem] shadow-2xl text-center space-y-8">
+                        <div class="w-full max-w-sm bg-[#0f172a] border border-white/5 p-8 md:p-10 rounded-[3rem] shadow-2xl text-center space-y-8">
                             <div class="space-y-2">
-                                <div class="w-16 h-16 bg-sky-500 rounded-2xl flex items-center justify-center text-slate-900 font-black text-2xl mx-auto shadow-lg shadow-sky-500/20 mb-4">LQ</div>
+                                <div class="w-16 h-16 bg-sky-500 rounded-2xl flex items-center justify-center text-slate-900 font-black text-2xl mx-auto mb-4 shadow-lg shadow-sky-500/20">LQ</div>
                                 <h1 class="text-2xl font-black tracking-tighter">LingoQuest <span class="text-sky-500 italic">Pro</span></h1>
-                                <p class="text-slate-500 text-xs font-medium">Aprende Inglês com Inteligência.</p>
+                                <p class="text-slate-500 text-xs font-medium tracking-wide uppercase">Línguas com Inteligência</p>
                             </div>
                             <div class="space-y-3">
-                                <button onclick="window.loginWithGoogle()" class="w-full flex items-center justify-center gap-3 bg-white text-slate-900 py-4 rounded-2xl font-bold text-sm shadow-lg active:scale-95 transition-transform">
+                                <button onclick="window.loginWithGoogle()" class="w-full flex items-center justify-center gap-3 bg-white text-slate-900 py-4 rounded-2xl font-bold text-sm shadow-md active:scale-95 transition-transform">
                                     <i class="fab fa-google"></i> Gmail
                                 </button>
                                 <button onclick="window.loginAsGuest()" class="w-full bg-slate-800 text-slate-300 py-4 rounded-2xl font-bold text-sm border border-white/5 active:scale-95 transition-transform">
-                                    Convidado
+                                    Modo Convidado
                                 </button>
                             </div>
                         </div>
@@ -256,26 +280,24 @@
 
             appContainer.innerHTML = `
                 <div class="w-full max-w-5xl flex flex-col min-h-screen relative bg-[#020617] border-x border-white/5 shadow-2xl">
-                    <header class="p-4 md:p-6 glass-header flex justify-between items-center sticky top-0 z-50">
-                        <div class="flex items-center gap-6">
-                            <div onclick="changeView('home')" class="cursor-pointer group flex items-center gap-2">
-                                <div class="w-9 h-9 bg-sky-500 rounded-xl flex items-center justify-center text-slate-900 font-black">LQ</div>
-                                <h1 class="text-xl font-black tracking-tighter">LingoQuest <span class="text-sky-400 font-medium">Pro</span></h1>
-                            </div>
+                    <header class="p-4 md:p-6 bg-[#0f172a]/80 backdrop-blur-md border-b border-white/5 flex justify-between items-center sticky top-0 z-50">
+                        <div onclick="changeView('home')" class="cursor-pointer flex items-center gap-2">
+                            <div class="w-8 h-8 bg-sky-500 rounded-xl flex items-center justify-center text-slate-900 font-black text-xs">LQ</div>
+                            <h1 class="text-lg font-black tracking-tighter">LingoQuest <span class="text-sky-400 font-medium">Pro</span></h1>
                         </div>
-                        <div class="bg-amber-500/10 px-4 py-2 rounded-2xl border border-amber-500/20 text-amber-500 font-black text-xs">
+                        <div class="bg-amber-500/10 px-3 py-1.5 rounded-2xl border border-amber-500/20 text-amber-500 font-black text-[11px]">
                             💎 ${state.userData.gems}
                         </div>
                     </header>
 
-                    <main class="flex-1 p-6 md:p-10 pb-32 animate-slide-up">
+                    <main class="flex-1 p-5 md:p-10 pb-32">
                         ${renderContent()}
                     </main>
 
-                    <nav class="fixed bottom-0 left-0 right-0 md:relative bg-[#020617]/90 backdrop-blur-xl border-t border-white/5 p-4 flex justify-around items-center z-50 safe-area-bottom">
+                    <nav class="fixed bottom-0 left-0 right-0 md:relative bg-[#020617]/95 backdrop-blur-xl border-t border-white/5 p-4 flex justify-around items-center z-50">
                         <button onclick="changeView('home')" class="flex flex-col items-center gap-1 ${state.view === 'home' ? 'text-sky-400' : 'opacity-40'}">
                             <i class="fas fa-home text-lg"></i>
-                            <span class="text-[8px] font-bold uppercase">Início</span>
+                            <span class="text-[8px] font-bold uppercase">Aulas</span>
                         </button>
                         <button onclick="changeView('tutor')" class="flex flex-col items-center gap-1 ${state.view === 'tutor' ? 'text-sky-400' : 'opacity-40'}">
                             <i class="fas fa-robot text-lg"></i>
@@ -302,57 +324,57 @@
         function renderContent() {
             switch(state.view) {
                 case 'home': return `
-                    <div class="space-y-8">
-                        <div class="card-gradient rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden border border-white/5">
+                    <div class="space-y-6">
+                        <div class="bg-gradient-to-br from-sky-700 to-indigo-950 rounded-[2rem] p-8 shadow-2xl relative overflow-hidden border border-white/5">
                             <div class="relative z-10">
-                                <p class="text-sky-200 text-[9px] font-bold uppercase tracking-widest mb-1 opacity-70">Nível Atual</p>
-                                <h2 class="text-3xl font-black mb-6 italic tracking-tighter uppercase">${state.userData.level}</h2>
+                                <p class="text-sky-200 text-[9px] font-bold uppercase tracking-widest mb-1 opacity-70 italic">Nível Atual</p>
+                                <h2 class="text-2xl font-black mb-4 italic tracking-tighter uppercase">${state.userData.level}</h2>
                                 <div class="flex items-center gap-4">
-                                    <div class="flex-1 bg-black/40 h-3 rounded-full overflow-hidden p-0.5 border border-white/10">
-                                        <div class="bg-emerald-400 h-full rounded-full transition-all duration-1000 shadow-[0_0_10px_#10b981]" style="width: ${state.userData.xp % 100}%"></div>
+                                    <div class="flex-1 bg-black/40 h-2.5 rounded-full overflow-hidden p-0.5 border border-white/10">
+                                        <div class="bg-emerald-400 h-full rounded-full transition-all duration-1000 shadow-[0_0_8px_#10b981]" style="width: ${state.userData.xp % 100}%"></div>
                                     </div>
-                                    <span class="font-black text-sky-400 text-[10px]">${state.userData.xp} XP</span>
+                                    <span class="font-black text-sky-400 text-[9px]">${state.userData.xp} XP</span>
                                 </div>
                             </div>
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             ${[
-                                { id: 'basic', label: 'Básico', icon: '🌱', desc: 'Frases do dia-a-dia' },
-                                { id: 'intermediate', label: 'Intermédio', icon: '🚀', desc: 'Gramática e Fluência' },
-                                { id: 'advanced_tech', label: 'Técnico IT', icon: '🚢', desc: 'Engenharia e Tech' },
+                                { id: 'basic', label: 'Básico', icon: '🌱', desc: 'Frases quotidianas' },
+                                { id: 'intermediate', label: 'Intermédio', icon: '🚀', desc: 'Fluência e Conversação' },
+                                { id: 'advanced_tech', label: 'Técnico IT', icon: '🚢', desc: 'Vocabulário Tech' },
                                 { id: 'premium_zone', label: 'Master VIP', icon: '👑', desc: 'Exclusivo Premium', premium: true }
                             ].map(lvl => `
-                                <button onclick="window.handleLevel('${lvl.id}')" class="p-6 bg-[#1E293B]/60 rounded-3xl border border-white/5 text-left transition-all active:scale-95 group relative ${lvl.premium && !state.userData.isPremium ? 'opacity-40 grayscale' : ''}">
+                                <button onclick="window.handleLevel('${lvl.id}')" class="p-5 bg-[#1E293B]/60 rounded-2xl border border-white/5 text-left transition-all active:scale-95 group relative ${lvl.premium && !state.userData.isPremium ? 'opacity-40 grayscale' : ''}">
                                     <div class="text-2xl mb-3">${state.userData.unlockedLevels.includes(lvl.id) || state.userData.isPremium ? lvl.icon : '🔒'}</div>
                                     <h4 class="font-black text-xs uppercase tracking-widest mb-1">${lvl.label}</h4>
-                                    <p class="text-[10px] text-slate-500 font-medium leading-tight">${lvl.desc}</p>
+                                    <p class="text-[9px] text-slate-500 font-medium leading-tight">${lvl.desc}</p>
                                     ${state.userData.level === lvl.id ? '<div class="absolute top-4 right-4 w-2 h-2 bg-emerald-500 rounded-full shadow-[0_0_8px_#10b981]"></div>' : ''}
                                 </button>
                             `).join('')}
                         </div>
 
                         ${!state.userData.isPremium ? `
-                            <div class="bg-slate-900/60 border border-white/5 rounded-3xl p-6 text-center">
+                            <div class="bg-slate-900/60 border border-white/5 rounded-[1.5rem] p-6 text-center">
                                 <span class="text-[8px] font-black text-slate-600 uppercase tracking-widest block mb-2">Publicidade AdMob</span>
-                                <p class="text-[10px] text-slate-500 italic">Remove anúncios com o Premium</p>
+                                <p class="text-[10px] text-slate-500 italic">Desbloqueia o Premium para remover anúncios.</p>
                             </div>
                         ` : ''}
                     </div>
                 `;
                 case 'tutor': return `
-                    <div class="flex flex-col h-[65vh] bg-[#0f172a]/30 rounded-[2rem] border border-white/5 overflow-hidden p-2 shadow-2xl">
+                    <div class="flex flex-col h-[65vh] bg-[#0f172a]/30 rounded-[1.5rem] border border-white/5 overflow-hidden p-1.5 shadow-2xl">
                         <div id="chat-history" class="flex-1 overflow-y-auto space-y-4 p-4 scrollbar-hide">
                             ${state.messages.map(m => `
                                 <div class="flex ${m.userId === state.user.uid ? 'justify-end' : 'justify-start'}">
-                                    <div class="max-w-[85%] p-4 rounded-2xl text-[11px] leading-relaxed shadow-lg ${m.userId === state.user.uid ? 'bg-sky-600 text-white font-bold rounded-tr-none' : 'bg-slate-800 border border-white/5 rounded-tl-none text-slate-200'}">
+                                    <div class="max-w-[85%] p-3 rounded-2xl text-[11px] leading-relaxed shadow-lg ${m.userId === state.user.uid ? 'bg-sky-600 text-white font-bold rounded-tr-none' : 'bg-slate-800 border border-white/5 rounded-tl-none text-slate-200'}">
                                         ${m.text}
                                     </div>
                                 </div>
                             `).join('')}
                         </div>
-                        <form onsubmit="window.sendMsg(event)" class="bg-slate-900/90 p-2 rounded-2xl flex gap-2 border border-white/10 m-2 shadow-lg">
-                            <input id="chat-input" type="text" placeholder="Type here..." class="flex-1 bg-transparent border-none px-4 text-xs focus:outline-none text-white" />
+                        <form onsubmit="window.sendMsg(event)" class="bg-slate-900 p-2 rounded-2xl flex gap-2 border border-white/10 m-1 shadow-inner">
+                            <input id="chat-input" type="text" placeholder="Diz algo em inglês..." class="flex-1 bg-transparent border-none px-4 text-xs focus:outline-none text-white" />
                             <button type="submit" class="bg-sky-500 text-slate-900 w-10 h-10 rounded-xl font-black active:scale-90 flex items-center justify-center">
                                 <i class="fas fa-paper-plane"></i>
                             </button>
@@ -361,38 +383,36 @@
                 `;
                 case 'store': return `
                     <div class="space-y-6">
-                        <div class="premium-gradient rounded-[2.5rem] p-8 shadow-3xl border border-white/10 relative overflow-hidden group">
-                             <div class="relative z-10 space-y-4">
-                                <span class="bg-white/10 px-3 py-1 rounded-full text-[8px] font-bold uppercase tracking-widest text-white">Elite</span>
+                        <div class="bg-gradient-to-r from-indigo-700 to-purple-800 rounded-[2rem] p-8 shadow-3xl border border-white/10 relative overflow-hidden group">
+                             <div class="relative z-10 space-y-4 text-center sm:text-left">
+                                <span class="bg-white/10 px-3 py-1 rounded-full text-[8px] font-bold uppercase tracking-widest text-white">VIP</span>
                                 <h3 class="text-2xl font-black italic tracking-tighter">Premium</h3>
-                                <ul class="text-[10px] text-indigo-100 opacity-80 space-y-1">
-                                  <li>✨ Zero anúncios AdMob</li>
-                                  <li>🤖 Tutor IA Ilimitado</li>
-                                  <li>🔓 Todos os Níveis</li>
-                                  <li>💎 +1.000 Gemas</li>
-                                </ul>
+                                <p class="text-[10px] text-indigo-100 opacity-80 italic">Apoia o projeto e desbloqueia o tutor ilimitado.</p>
                                 <button onclick="window.buyItem('premium')" class="w-full py-4 bg-white text-indigo-900 rounded-2xl font-black uppercase text-[10px] active:scale-95 transition-all ${state.userData.isPremium ? 'opacity-50' : ''}" ${state.userData.isPremium ? 'disabled' : ''}>
-                                    ${state.userData.isPremium ? 'Ativo' : 'Ativar por 14.99€'}
+                                    ${state.userData.isPremium ? 'Premium Ativo' : 'Ativar por 14.99€'}
                                 </button>
                              </div>
                         </div>
 
                         <div class="grid grid-cols-2 gap-4">
-                            <div class="bg-[#1E293B]/60 border border-white/5 p-6 rounded-3xl text-center space-y-4">
+                            <div class="bg-[#1E293B]/60 border border-white/5 p-6 rounded-3xl text-center space-y-3">
                                 <div class="text-2xl">💎</div>
-                                <div class="font-black text-xl">500</div>
-                                <button onclick="window.buyItem('gems', 500)" class="w-full py-2 bg-slate-800 text-slate-400 rounded-xl font-bold uppercase text-[9px] border border-white/5 active:bg-white active:text-slate-900">4.99€</button>
+                                <div class="font-black text-xl tracking-tighter">500</div>
+                                <button onclick="window.buyItem('gems', 500)" class="w-full py-2 bg-slate-800 text-slate-400 rounded-xl font-bold uppercase text-[9px] border border-white/5">4.99€</button>
                             </div>
-                            <div class="bg-[#1E293B]/60 border border-white/5 p-6 rounded-3xl text-center space-y-4">
+                            <div class="bg-[#1E293B]/60 border border-white/5 p-6 rounded-3xl text-center space-y-3">
                                 <div class="text-2xl">💰</div>
-                                <div class="font-black text-xl">2500</div>
-                                <button onclick="window.buyItem('gems', 2500)" class="w-full py-2 bg-slate-800 text-slate-400 rounded-xl font-bold uppercase text-[9px] border border-white/5 active:bg-white active:text-slate-900">14.99€</button>
+                                <div class="font-black text-xl tracking-tighter">2500</div>
+                                <button onclick="window.buyItem('gems', 2500)" class="w-full py-2 bg-slate-800 text-slate-400 rounded-xl font-bold uppercase text-[9px] border border-white/5">14.99€</button>
                             </div>
                         </div>
                     </div>
                 `;
             }
         }
+
+        // Iniciar Processo de Autenticação
+        startAuth();
     </script>
 </body>
 </html>
