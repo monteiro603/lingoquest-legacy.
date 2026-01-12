@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LingoQuest Pro: AdMob Edition</title>
+    <title>LingoQuest Pro: AdMob Final Edition</title>
     
-    <!-- Otimização de Performance e Preconnect -->
+    <!-- Otimização e Estilo -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -45,10 +45,8 @@
         }
 
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
         #app { opacity: 0; transition: opacity 0.5s ease; }
         #app.ready { opacity: 1; }
-        
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         
         .admob-banner-space {
@@ -71,33 +69,20 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
-        .lesson-card:hover {
-            border-color: var(--primary);
-            background: rgba(30, 41, 59, 0.8);
-            transform: translateY(-2px);
-        }
-
         .reward-gradient {
             background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
         }
-
-        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         .quiz-option {
             background: rgba(30, 41, 59, 0.4);
             border: 1px solid rgba(255, 255, 255, 0.05);
             transition: all 0.2s;
         }
-        .quiz-option:active { transform: scale(0.98); background: var(--primary); color: white; }
-        
+
         .rank-row {
             background: rgba(15, 23, 42, 0.5);
             border-bottom: 1px solid rgba(255, 255, 255, 0.02);
         }
-        .rank-gold { color: #fbbf24; }
-        .rank-silver { color: #94a3b8; }
-        .rank-bronze { color: #b45309; }
     </style>
 </head>
 <body>
@@ -114,12 +99,14 @@
         import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, query, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Configurações do Firebase
+        // NOTA: Para a APK real, deves importar o AdMob assim no teu projeto Capacitor:
+        // import { AdMob } from '@capacitor-community/admob';
+
         const firebaseConfig = JSON.parse(__firebase_config);
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'lingo-pro-admob';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'lingo-pro-final';
         const apiKey = ""; 
         const GEMINI_MODEL = "gemini-2.5-flash-preview-09-2025";
 
@@ -146,7 +133,7 @@
             }
         };
 
-        // --- DEFINIÇÃO DE FUNÇÕES GLOBAIS ---
+        // --- EXPOSIÇÃO GLOBAL PARA ONCLICK ---
         window.state = state;
 
         window.changeView = (v) => { 
@@ -179,8 +166,10 @@
         };
 
         window.handleLevel = async (lvl) => {
-            if (lvl === 'basic') {
-                state.view = 'curriculum';
+            if (lvl === 'basic' || lvl === 'basic_start') {
+                state.userData.level = 'basic';
+                if (lvl === 'basic') { state.view = 'curriculum'; }
+                else { state.view = 'tutor'; }
                 render();
             } else {
                 const costs = { intermediate: 200, advanced: 500 };
@@ -228,14 +217,14 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         contents: [{ parts: [{ text: text }] }],
-                        systemInstruction: { parts: [{ text: `És o Tutor LingoQuest Pro. O aluno está no nível ${state.userData.level}. Responde em Inglês e providencia traduções para Português se necessário.` }] }
+                        systemInstruction: { parts: [{ text: `És o Tutor LingoQuest Pro. Nível ${state.userData.level}. Ajuda com Inglês.` }] }
                     })
                 });
                 const data = await response.json();
-                const respText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Desculpa, ocorreu um erro na resposta.";
+                const respText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Erro na resposta do Tutor.";
                 await addDoc(msgCol, { text: respText, userId: 'ai', username: 'Tutor Gemini ✨', timestamp: serverTimestamp(), isAi: true });
             } catch (err) {
-                console.error("Erro no Tutor:", err);
+                console.error("Erro Tutor:", err);
             } finally {
                 state.aiLoading = false; 
                 render();
@@ -254,16 +243,48 @@
             render();
         };
 
+        // --- INTEGRAÇÃO REAL ADMOB PREMIADO ---
         window.showRewardedAd = async () => {
             if (!state.user) return;
-            // Simulação de visualização
+            
+            /* PARA A APK REAL (Remover os comentários /* abaixo):
+               
+               try {
+                 await AdMob.prepareRewardVideoAd({ adId: 'TEU-ID-REWARDED-AQUI' });
+                 const reward = await AdMob.showRewardVideoAd();
+                 
+                 if (reward) {
+                   state.userData.gems += 50;
+                   const userRef = doc(db, 'artifacts', appId, 'users', state.user.uid, 'profile', 'data');
+                   await updateDoc(userRef, { gems: state.userData.gems });
+                   render();
+                 }
+               } catch (e) {
+                 alert("Anúncio não disponível neste momento.");
+               }
+            */
+
+            // Simulação para o Preview
+            const overlay = document.createElement('div');
+            overlay.className = "fixed inset-0 bg-black/95 z-[11000] flex flex-col items-center justify-center p-10 text-center";
+            overlay.innerHTML = `<div class="loader-ring mb-8"></div><h3 class="text-xl font-bold">A Carregar Vídeo Premiado...</h3>`;
+            document.body.appendChild(overlay);
+
             setTimeout(async () => {
-                state.userData.gems += 50;
-                const userRef = doc(db, 'artifacts', appId, 'users', state.user.uid, 'profile', 'data');
-                await updateDoc(userRef, { gems: state.userData.gems });
-                render();
-                alert("Recebeste 50 gemas!");
-            }, 1000);
+                overlay.innerHTML = `
+                    <div class="text-6xl mb-4">💎</div>
+                    <h3 class="text-2xl font-black mb-2 text-emerald-400">Vídeo Assistido!</h3>
+                    <p class="text-sm text-slate-400 mb-6">Ganhaste 50 Gemas por apoiar a app.</p>
+                    <button id="claim-btn" class="px-8 py-3 bg-white text-slate-900 rounded-xl font-bold">Reclamar 50 Gemas</button>
+                `;
+                document.getElementById('claim-btn').onclick = async () => {
+                    state.userData.gems += 50;
+                    const userRef = doc(db, 'artifacts', appId, 'users', state.user.uid, 'profile', 'data');
+                    await updateDoc(userRef, { gems: state.userData.gems });
+                    overlay.remove();
+                    render();
+                };
+            }, 2000);
         };
 
         const appContainer = document.getElementById('app');
@@ -290,7 +311,7 @@
                         setTimeout(() => loader.style.display = 'none', 400);
                     }
                 });
-            } catch (err) { console.error("Erro de Auth:", err); }
+            } catch (err) { console.error("Erro Auth:", err); }
         };
 
         async function syncUserProfile() {
@@ -340,7 +361,6 @@
         }
 
         async function finishQuiz() {
-            if (!state.user) return;
             const earnedXP = state.quiz.score * 20;
             const earnedGems = Math.floor(state.quiz.score * 2);
             state.userData.xp += earnedXP;
@@ -357,7 +377,7 @@
 
         function render() {
             if (!state.user) {
-                appContainer.innerHTML = `<div class="p-20 text-center">A autenticar...</div>`;
+                appContainer.innerHTML = `<div class="p-20 text-center">A carregar perfil...</div>`;
                 return;
             }
 
@@ -432,7 +452,7 @@
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             ${[
-                                { id: 'basic', label: 'Iniciante', icon: '🌱', desc: 'Passos essenciais' },
+                                { id: 'basic', label: 'Iniciante', icon: '🌱', desc: 'Primeiros passos essenciais' },
                                 { id: 'intermediate', label: 'Intermédio', icon: '🚀', desc: 'Prática de conversação' },
                                 { id: 'advanced', label: 'Avançado', icon: '⚓', desc: 'Domínio e nuances' }
                             ].map(lvl => `
@@ -449,14 +469,13 @@
                     <div class="space-y-6 fade-in max-w-2xl mx-auto pb-10">
                         <div class="flex items-center gap-4">
                             <button onclick="window.changeView('home')" class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center"><i class="fas fa-arrow-left"></i></button>
-                            <h2 class="text-xl font-black italic">Primeiros Passos Essenciais</h2>
+                            <h2 class="text-xl font-black italic">Currículo Inicial</h2>
                         </div>
                         <div class="bg-slate-900/50 p-6 rounded-3xl border border-white/5 space-y-4 text-sm text-slate-300">
-                            <p><strong>Alfabeto e Sons:</strong> Pratique as letras e repita em voz alta.</p>
-                            <p><strong>Vocabulário:</strong> Números, cores, saudações (Hello, Hi).</p>
-                            <p><strong>Verbo To Be:</strong> I am, You are, He is.</p>
-                            <p><strong>Estrutura:</strong> Sujeito + Verbo. Ex: "I like music".</p>
-                            <button onclick="window.handleLevel('basic_start')" class="w-full py-4 bg-sky-500 text-slate-900 rounded-xl font-black mt-4">PRATICAR AGORA</button>
+                            <p><strong>Alfabeto e Sons:</strong> Domina a base da pronúncia.</p>
+                            <p><strong>Vocabulário:</strong> Cores, números e saudações.</p>
+                            <p><strong>Verbo To Be:</strong> O pilar para frases simples.</p>
+                            <button onclick="window.handleLevel('basic_start')" class="w-full py-4 bg-sky-500 text-slate-900 rounded-xl font-black mt-4">PRATICAR COM TUTOR</button>
                         </div>
                     </div>
                 `;
@@ -466,9 +485,6 @@
                         <div class="max-w-xl mx-auto space-y-8 fade-in">
                             <div class="flex justify-between items-center">
                                 <span class="text-[10px] font-black uppercase text-slate-500">Pergunta ${state.quiz.currentQ + 1} de ${state.quiz.questions.length}</span>
-                                <div class="w-32 bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                                    <div class="bg-sky-500 h-full" style="width: ${(state.quiz.currentQ/state.quiz.questions.length)*100}%"></div>
-                                </div>
                             </div>
                             <h2 class="text-2xl font-black italic tracking-tighter leading-tight">${q.q}</h2>
                             <div class="grid grid-cols-1 gap-3">
@@ -484,35 +500,28 @@
                 case 'quiz_result': return `
                     <div class="text-center space-y-8 fade-in py-10">
                         <div class="text-7xl">🎉</div>
-                        <h2 class="text-4xl font-black italic tracking-tighter">Quiz Terminado!</h2>
-                        <p class="text-slate-400 text-sm">Acertaste ${state.quiz.score} de ${state.quiz.questions.length} perguntas.</p>
+                        <h2 class="text-3xl font-black">Quiz Concluído!</h2>
+                        <p class="text-slate-400">Acertaste ${state.quiz.score} de ${state.quiz.questions.length}.</p>
                         <div class="bg-emerald-500/10 p-6 rounded-3xl border border-emerald-500/20 inline-block">
                             <div class="text-emerald-400 font-black text-2xl">+${state.quiz.score * 20} XP</div>
-                            <div class="text-amber-500 font-black text-lg">+${state.quiz.score * 2} 💎</div>
                         </div>
-                        <button onclick="window.changeView('home')" class="w-full py-5 bg-sky-500 text-slate-900 rounded-2xl font-black uppercase text-xs shadow-xl active:scale-95 transition-all">Voltar ao Início</button>
+                        <button onclick="window.changeView('home')" class="w-full py-5 bg-sky-500 text-slate-900 rounded-2xl font-black uppercase text-xs">Continuar</button>
                     </div>
                 `;
                 case 'ranking': return `
                     <div class="space-y-8 fade-in">
-                        <header class="text-center space-y-2">
-                            <h2 class="text-3xl font-black italic tracking-tighter">Ranking Global 🏆</h2>
-                            <p class="text-slate-500 text-[10px] font-black uppercase tracking-widest">Os melhores alunos do LingoQuest</p>
+                        <header class="text-center">
+                            <h2 class="text-3xl font-black italic">Ranking 🏆</h2>
+                            <p class="text-slate-500 text-[10px] font-black uppercase">Os melhores do LingoQuest</p>
                         </header>
                         <div class="rounded-3xl overflow-hidden border border-white/5">
                             ${state.leaderboard.map((u, i) => `
-                                <div class="rank-row p-5 flex items-center justify-between ${u.uid === state.user.uid ? 'bg-sky-500/10 border-sky-500/20' : ''}">
+                                <div class="rank-row p-5 flex items-center justify-between ${u.uid === state.user.uid ? 'bg-sky-500/10' : ''}">
                                     <div class="flex items-center gap-4">
-                                        <span class="w-6 font-black text-sm ${i === 0 ? 'rank-gold' : i === 1 ? 'rank-silver' : i === 2 ? 'rank-bronze' : 'text-slate-500'}">${i + 1}</span>
-                                        <div>
-                                            <div class="text-sm font-black flex items-center gap-2">
-                                                ${u.name}
-                                                ${u.isPremium ? '<i class="fas fa-crown text-[10px] text-amber-500"></i>' : ''}
-                                            </div>
-                                            <div class="text-[9px] text-slate-500 font-bold uppercase">${u.xp} XP Total</div>
-                                        </div>
+                                        <span class="w-6 font-black text-sm text-slate-500">${i + 1}</span>
+                                        <div class="text-sm font-black">${u.name}</div>
                                     </div>
-                                    ${i < 3 ? `<div class="text-lg">${i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'}</div>` : ''}
+                                    <div class="text-[10px] text-sky-400 font-bold uppercase">${u.xp} XP</div>
                                 </div>
                             `).join('')}
                         </div>
@@ -528,11 +537,10 @@
                                     </div>
                                 </div>
                             `).join('')}
-                            ${state.aiLoading ? '<div class="text-sky-500 text-[10px] p-2 animate-pulse">O Tutor está a escrever...</div>' : ''}
                         </div>
                         <form onsubmit="window.sendMsg(event)" class="bg-slate-900 p-2 rounded-2xl flex gap-2 border border-white/10 m-1 shadow-inner">
-                            <input id="chat-input" type="text" placeholder="Diz algo em inglês..." class="flex-1 bg-transparent border-none px-4 text-xs focus:outline-none text-white" />
-                            <button type="submit" class="bg-sky-500 text-slate-900 w-10 h-10 rounded-xl font-black active:scale-90 flex items-center justify-center">
+                            <input id="chat-input" type="text" placeholder="Diz algo..." class="flex-1 bg-transparent border-none px-4 text-xs focus:outline-none text-white" />
+                            <button type="submit" class="bg-sky-500 text-slate-900 w-10 h-10 rounded-xl font-black flex items-center justify-center">
                                 <i class="fas fa-paper-plane"></i>
                             </button>
                         </form>
@@ -540,20 +548,16 @@
                 `;
                 case 'store': return `
                     <div class="space-y-6 fade-in">
-                        <div class="bg-gradient-to-r from-indigo-700 to-purple-800 rounded-[2rem] p-8 text-center space-y-4 shadow-xl border border-white/10 relative overflow-hidden group">
-                             <div class="relative z-10 space-y-4 text-center sm:text-left">
-                                <h3 class="text-2xl font-black italic tracking-tighter">Premium</h3>
-                                <p class="text-[10px] text-indigo-100 opacity-80 italic">Apoia o projeto e desbloqueia o tutor ilimitado.</p>
-                                <button onclick="window.buyItem('premium')" class="w-full py-4 bg-white text-indigo-900 rounded-2xl font-black uppercase text-[10px] active:scale-95 transition-all ${state.userData.isPremium ? 'opacity-50' : ''}" ${state.userData.isPremium ? 'disabled' : ''}>
-                                    ${state.userData.isPremium ? 'Ativo' : 'Ativar por 14.99€'}
-                                </button>
-                             </div>
+                        <div class="bg-indigo-700 rounded-[2rem] p-8 text-center space-y-4 shadow-xl border border-white/10">
+                            <h3 class="text-2xl font-black italic">Premium</h3>
+                            <button onclick="window.buyItem('premium')" class="w-full py-4 bg-white text-indigo-900 rounded-2xl font-black uppercase text-[10px]" ${state.userData.isPremium ? 'disabled' : ''}>
+                                ${state.userData.isPremium ? 'Ativado' : 'Ativar por 14.99€'}
+                            </button>
                         </div>
-
-                        <div class="bg-slate-900 p-6 rounded-3xl border border-amber-500/20 text-center space-y-4 shadow-inner">
-                            <h4 class="font-black uppercase text-xs text-amber-500 tracking-widest">Gemas Grátis 🎁</h4>
-                            <p class="text-[10px] text-slate-500">Vê um pequeno vídeo publicitário para ganhares 50 gemas!</p>
-                            <button onclick="window.showRewardedAd()" class="w-full py-4 reward-gradient text-white rounded-2xl font-black uppercase text-[10px] shadow-lg active:scale-95 transition-all">
+                        <div class="bg-slate-900 p-6 rounded-3xl border border-amber-500/20 text-center space-y-4">
+                            <h4 class="font-black uppercase text-xs text-amber-500">Gemas Grátis 🎁</h4>
+                            <p class="text-[10px] text-slate-500">Assiste a um vídeo e ganha 50 gemas!</p>
+                            <button onclick="window.showRewardedAd()" class="w-full py-4 reward-gradient text-white rounded-2xl font-black uppercase text-[10px]">
                                 <i class="fas fa-play mr-2"></i> Ganhar +50 Gemas
                             </button>
                         </div>
