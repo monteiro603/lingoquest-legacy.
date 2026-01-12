@@ -5,138 +5,125 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>LingoQuest Pro: Legacy</title>
     
-    <!-- Otimização de Rede Crítica -->
+    <!-- Otimização de DNS e Pré-conexão para APK -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
     
-    <!-- Pré-carregamento da Fonte Principal -->
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&display=swap" as="style">
-    
-    <!-- PWA -->
+    <!-- PWA / Mobile Meta -->
     <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#020617">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind CSS - Carregamento otimizado para não bloquear a renderização -->
+    <script src="https://cdn.tailwindcss.com" defer></script>
     
-    <!-- Estilos Críticos (Carregamento Imediato) -->
+    <!-- Estilos Críticos Integrados (Zero latência de rede) -->
     <style>
         :root { --bg: #020617; --primary: #0ea5e9; }
-        body { background-color: var(--bg); margin: 0; font-family: sans-serif; }
+        body { 
+            background-color: var(--bg); 
+            margin: 0; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            overflow: hidden;
+        }
         
         #critical-loader {
             position: fixed; inset: 0; background: var(--bg);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            z-index: 10000; transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 10000; transition: opacity 0.5s ease;
         }
 
         .loader-ring {
-            width: 48px; height: 48px;
-            border: 3px solid rgba(14, 165, 233, 0.1);
+            width: 50px; height: 50px;
+            border: 3px solid rgba(14, 165, 233, 0.05);
             border-top: 3px solid var(--primary);
             border-radius: 50%;
-            animation: spin 0.8s linear infinite;
+            animation: spin 0.7s linear infinite;
         }
 
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        /* Ocultar conteúdo até estar pronto */
-        #app { opacity: 0; transition: opacity 0.3s ease; }
-        #app.ready { opacity: 1; }
+        #app { opacity: 0; transform: translateY(10px); transition: all 0.5s ease; }
+        #app.ready { opacity: 1; transform: translateY(0); }
 
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
         .bg-pattern {
             background-image: radial-gradient(#1e293b 0.8px, transparent 0.8px);
             background-size: 24px 24px;
         }
+        
+        /* Previne lag de toque em dispositivos móveis */
+        button, a { touch-action: manipulation; }
     </style>
 
-    <!-- Fontes Secundárias -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" media="print" onload="this.media='all'">
+    <!-- Fontes e Ícones Secundários (Carregados após o conteúdo principal) -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
 </head>
 <body>
 
+    <!-- Loader instantâneo para APK -->
     <div id="critical-loader">
         <div class="loader-ring"></div>
-        <div style="margin-top: 20px; color: var(--primary); font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 11px; letter-spacing: 3px; text-transform: uppercase;">A Ligar...</div>
+        <div style="margin-top: 25px; color: var(--primary); font-weight: 800; font-size: 10px; letter-spacing: 4px; text-transform: uppercase;">LingoQuest Pro</div>
     </div>
 
     <div id="app" class="min-h-screen flex flex-col items-center"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken, signInWithPopup, GoogleAuthProvider, signOut, signInWithRedirect, getRedirectResult } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, query, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Inicialização Global
         const firebaseConfig = JSON.parse(__firebase_config);
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
         const appId = (typeof __app_id !== 'undefined' && __app_id) ? __app_id : 'lingoquest-pro-v2';
-        const apiKey = ""; // Gerido pelo ambiente
+        const apiKey = ""; 
         const GEMINI_MODEL = "gemini-2.5-flash-preview-09-2025";
 
         let state = {
-            user: null, 
-            view: 'home',
+            user: null, view: 'home',
             userData: { gems: 100, xp: 0, streak: 1, level: 'basic', isPremium: false, unlockedLevels: ['basic'] },
-            messages: [], 
-            aiLoading: false
+            messages: [], aiLoading: false
         };
 
         const appContainer = document.getElementById('app');
         const loader = document.getElementById('critical-loader');
 
-        // Referências para cancelamento de ouvintes
-        let unsubMessages = null;
-        let unsubProfile = null;
-
-        // REGRA 3: Lógica de Autenticação Robusta
-        const startAuth = async () => {
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else if (!auth.currentUser) {
-                    await signInAnonymously(auth);
-                }
-            } catch (err) {
-                console.error("Erro no processo de Auth:", err);
+        // REGRA 3: Autenticação prioritária
+        const authenticate = async () => {
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                return await signInWithCustomToken(auth, __initial_auth_token);
             }
+            if (!auth.currentUser) {
+                return await signInAnonymously(auth);
+            }
+            return auth.currentUser;
         };
 
-        // Ouvinte de Estado de Autenticação
         onAuthStateChanged(auth, async (user) => {
-            // Limpar ouvintes anteriores se o utilizador mudar
-            if (unsubMessages) unsubMessages();
-            if (unsubProfile) unsubProfile();
-
             state.user = user;
-            
             if (user) {
-                // Sincronizar perfil e depois iniciar chat
+                // Carregar perfil primeiro (rápido)
                 await syncUserProfile();
+                // Iniciar chat em segundo plano
                 setupRealtimeMessages();
                 
-                // Mostrar UI
+                // Mostrar a interface o mais rápido possível
                 requestAnimationFrame(() => {
                     render();
                     appContainer.classList.add('ready');
                     loader.style.opacity = '0';
-                    setTimeout(() => loader.style.display = 'none', 400);
+                    setTimeout(() => loader.style.display = 'none', 500);
                 });
-            } else {
-                // Se não houver utilizador, forçar auth
-                render();
-                loader.style.opacity = '0';
-                setTimeout(() => loader.style.display = 'none', 400);
             }
         });
 
         async function syncUserProfile() {
             if (!state.user) return;
-            // REGRA 1: Caminho privado /artifacts/{appId}/users/{userId}/{collectionName}
             const userRef = doc(db, 'artifacts', appId, 'users', state.user.uid, 'profile', 'data');
             try {
                 const docSnap = await getDoc(userRef);
@@ -145,26 +132,17 @@
                 } else {
                     await setDoc(userRef, state.userData);
                 }
-            } catch (e) {
-                console.error("Erro ao carregar perfil:", e);
-            }
+            } catch (e) { console.error("Perfil offline ou erro de rede"); }
         }
 
         function setupRealtimeMessages() {
             if (!state.user) return;
-            // REGRA 1: Caminho público /artifacts/{appId}/public/data/{collectionName}
             const msgCol = collection(db, 'artifacts', appId, 'public', 'data', 'messages');
-            
-            // REGRA 2: Apenas consultas simples
-            unsubMessages = onSnapshot(msgCol, (snap) => {
+            onSnapshot(msgCol, (snap) => {
                 const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                // Ordenação em memória para respeitar a Regra 2
                 state.messages = list.sort((a, b) => (a.timestamp?.seconds || 0) - (b.timestamp?.seconds || 0));
                 if (state.view === 'tutor') render();
-            }, (err) => {
-                // Se houver erro de permissão, tentamos re-autenticar silenciosamente
-                console.error("Erro no ouvinte Firestore:", err);
-            });
+            }, (err) => console.warn("Firestore: Permissões pendentes..."));
         }
 
         async function callGemini(prompt, system) {
@@ -179,10 +157,10 @@
                 });
                 const data = await response.json();
                 return data.candidates?.[0]?.content?.parts?.[0]?.text;
-            } catch (e) { return "Tutor ocupado. Tenta novamente mais tarde."; }
+            } catch (e) { return "Tutor offline. Tenta novamente."; }
         }
 
-        // Funções de Interface
+        // Handlers Globais vinculados ao objeto window para o HTML Inline
         window.changeView = (v) => { state.view = v; render(); };
         window.loginWithGoogle = () => signInWithPopup(auth, new GoogleAuthProvider());
         window.loginAsGuest = () => signInAnonymously(auth);
@@ -191,7 +169,6 @@
         window.handleLevel = async (lvl) => {
             if (!state.user) return;
             const costs = { basic: 0, intermediate: 200, advanced_tech: 500 };
-            
             if (state.userData.isPremium || state.userData.unlockedLevels.includes(lvl)) {
                 state.userData.level = lvl;
                 state.view = 'tutor';
@@ -202,9 +179,7 @@
                 const userRef = doc(db, 'artifacts', appId, 'users', state.user.uid, 'profile', 'data');
                 await updateDoc(userRef, state.userData);
                 state.view = 'tutor';
-            } else { 
-                state.view = 'store'; 
-            }
+            } else { state.view = 'store'; }
             render();
         };
 
@@ -224,25 +199,11 @@
                     username: state.user.isAnonymous ? `Convidado ${state.user.uid.slice(0,4)}` : state.user.displayName || 'Aluno',
                     timestamp: serverTimestamp()
                 });
-
-                state.aiLoading = true; 
-                render();
-                
-                const resp = await callGemini(text, `És o Tutor LingoQuest. O aluno está no nível ${state.userData.level}. Responde em inglês e dá uma breve tradução em português.`);
-                
-                await addDoc(msgCol, { 
-                    text: resp, 
-                    userId: 'ai', 
-                    username: 'Tutor Gemini ✨', 
-                    timestamp: serverTimestamp(), 
-                    isAi: true 
-                });
-            } catch (err) {
-                console.error("Erro ao enviar mensagem:", err);
-            } finally {
-                state.aiLoading = false; 
-                render();
-            }
+                state.aiLoading = true; render();
+                const resp = await callGemini(text, `És o Tutor LingoQuest. Nível ${state.userData.level}. Responde em inglês e traduz brevemente.`);
+                await addDoc(msgCol, { text: resp, userId: 'ai', username: 'Tutor Gemini ✨', timestamp: serverTimestamp(), isAi: true });
+            } catch (err) { console.error("Erro no chat:", err); }
+            finally { state.aiLoading = false; render(); }
         };
 
         window.buyItem = async (type, val) => {
@@ -262,14 +223,14 @@
                             <div class="space-y-2">
                                 <div class="w-16 h-16 bg-sky-500 rounded-2xl flex items-center justify-center text-slate-900 font-black text-2xl mx-auto mb-4 shadow-lg shadow-sky-500/20">LQ</div>
                                 <h1 class="text-2xl font-black tracking-tighter">LingoQuest <span class="text-sky-500 italic">Pro</span></h1>
-                                <p class="text-slate-500 text-xs font-medium tracking-wide uppercase">Línguas com Inteligência</p>
+                                <p class="text-slate-500 text-[10px] font-bold tracking-widest uppercase">Inteligência Linguística</p>
                             </div>
                             <div class="space-y-3">
-                                <button onclick="window.loginWithGoogle()" class="w-full flex items-center justify-center gap-3 bg-white text-slate-900 py-4 rounded-2xl font-bold text-sm shadow-md active:scale-95 transition-transform">
+                                <button onclick="window.loginWithGoogle()" class="w-full flex items-center justify-center gap-3 bg-white text-slate-900 py-4 rounded-2xl font-bold text-sm shadow-md active:scale-95 transition-all">
                                     <i class="fab fa-google"></i> Gmail
                                 </button>
-                                <button onclick="window.loginAsGuest()" class="w-full bg-slate-800 text-slate-300 py-4 rounded-2xl font-bold text-sm border border-white/5 active:scale-95 transition-transform">
-                                    Modo Convidado
+                                <button onclick="window.loginAsGuest()" class="w-full bg-slate-800 text-slate-300 py-4 rounded-2xl font-bold text-sm border border-white/5 active:scale-95 transition-all">
+                                    Convidado
                                 </button>
                             </div>
                         </div>
@@ -280,9 +241,9 @@
 
             appContainer.innerHTML = `
                 <div class="w-full max-w-5xl flex flex-col min-h-screen relative bg-[#020617] border-x border-white/5 shadow-2xl">
-                    <header class="p-4 md:p-6 bg-[#0f172a]/80 backdrop-blur-md border-b border-white/5 flex justify-between items-center sticky top-0 z-50">
+                    <header class="p-4 md:p-6 bg-[#0f172a]/90 backdrop-blur-md border-b border-white/5 flex justify-between items-center sticky top-0 z-50">
                         <div onclick="changeView('home')" class="cursor-pointer flex items-center gap-2">
-                            <div class="w-8 h-8 bg-sky-500 rounded-xl flex items-center justify-center text-slate-900 font-black text-xs">LQ</div>
+                            <div class="w-8 h-8 bg-sky-500 rounded-xl flex items-center justify-center text-slate-900 font-black text-[10px]">LQ</div>
                             <h1 class="text-lg font-black tracking-tighter">LingoQuest <span class="text-sky-400 font-medium">Pro</span></h1>
                         </div>
                         <div class="bg-amber-500/10 px-3 py-1.5 rounded-2xl border border-amber-500/20 text-amber-500 font-black text-[11px]">
@@ -297,7 +258,7 @@
                     <nav class="fixed bottom-0 left-0 right-0 md:relative bg-[#020617]/95 backdrop-blur-xl border-t border-white/5 p-4 flex justify-around items-center z-50">
                         <button onclick="changeView('home')" class="flex flex-col items-center gap-1 ${state.view === 'home' ? 'text-sky-400' : 'opacity-40'}">
                             <i class="fas fa-home text-lg"></i>
-                            <span class="text-[8px] font-bold uppercase">Aulas</span>
+                            <span class="text-[8px] font-bold uppercase">Início</span>
                         </button>
                         <button onclick="changeView('tutor')" class="flex flex-col items-center gap-1 ${state.view === 'tutor' ? 'text-sky-400' : 'opacity-40'}">
                             <i class="fas fa-robot text-lg"></i>
@@ -324,13 +285,13 @@
         function renderContent() {
             switch(state.view) {
                 case 'home': return `
-                    <div class="space-y-6">
+                    <div class="space-y-6 animate-in">
                         <div class="bg-gradient-to-br from-sky-700 to-indigo-950 rounded-[2rem] p-8 shadow-2xl relative overflow-hidden border border-white/5">
                             <div class="relative z-10">
-                                <p class="text-sky-200 text-[9px] font-bold uppercase tracking-widest mb-1 opacity-70 italic">Nível Atual</p>
+                                <p class="text-sky-200 text-[9px] font-bold uppercase tracking-widest mb-1 opacity-70 italic">Progresso</p>
                                 <h2 class="text-2xl font-black mb-4 italic tracking-tighter uppercase">${state.userData.level}</h2>
                                 <div class="flex items-center gap-4">
-                                    <div class="flex-1 bg-black/40 h-2.5 rounded-full overflow-hidden p-0.5 border border-white/10">
+                                    <div class="flex-1 bg-black/40 h-2.5 rounded-full overflow-hidden p-0.5 border border-white/10 shadow-inner">
                                         <div class="bg-emerald-400 h-full rounded-full transition-all duration-1000 shadow-[0_0_8px_#10b981]" style="width: ${state.userData.xp % 100}%"></div>
                                     </div>
                                     <span class="font-black text-sky-400 text-[9px]">${state.userData.xp} XP</span>
@@ -341,8 +302,8 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             ${[
                                 { id: 'basic', label: 'Básico', icon: '🌱', desc: 'Frases quotidianas' },
-                                { id: 'intermediate', label: 'Intermédio', icon: '🚀', desc: 'Fluência e Conversação' },
-                                { id: 'advanced_tech', label: 'Técnico IT', icon: '🚢', desc: 'Vocabulário Tech' },
+                                { id: 'intermediate', label: 'Intermédio', icon: '🚀', desc: 'Fluência e Diálogo' },
+                                { id: 'advanced_tech', label: 'Técnico IT', icon: '🚢', desc: 'Engenharia e Tech' },
                                 { id: 'premium_zone', label: 'Master VIP', icon: '👑', desc: 'Exclusivo Premium', premium: true }
                             ].map(lvl => `
                                 <button onclick="window.handleLevel('${lvl.id}')" class="p-5 bg-[#1E293B]/60 rounded-2xl border border-white/5 text-left transition-all active:scale-95 group relative ${lvl.premium && !state.userData.isPremium ? 'opacity-40 grayscale' : ''}">
@@ -356,8 +317,8 @@
 
                         ${!state.userData.isPremium ? `
                             <div class="bg-slate-900/60 border border-white/5 rounded-[1.5rem] p-6 text-center">
-                                <span class="text-[8px] font-black text-slate-600 uppercase tracking-widest block mb-2">Publicidade AdMob</span>
-                                <p class="text-[10px] text-slate-500 italic">Desbloqueia o Premium para remover anúncios.</p>
+                                <span class="text-[8px] font-black text-slate-600 uppercase tracking-widest block mb-2">Google AdMob</span>
+                                <p class="text-[10px] text-slate-500 italic">Torna-te Premium para remover anúncios e apoiar o projeto.</p>
                             </div>
                         ` : ''}
                     </div>
@@ -387,7 +348,7 @@
                              <div class="relative z-10 space-y-4 text-center sm:text-left">
                                 <span class="bg-white/10 px-3 py-1 rounded-full text-[8px] font-bold uppercase tracking-widest text-white">VIP</span>
                                 <h3 class="text-2xl font-black italic tracking-tighter">Premium</h3>
-                                <p class="text-[10px] text-indigo-100 opacity-80 italic">Apoia o projeto e desbloqueia o tutor ilimitado.</p>
+                                <p class="text-[10px] text-indigo-100 opacity-80 italic">Acesso ilimitado e sem publicidade.</p>
                                 <button onclick="window.buyItem('premium')" class="w-full py-4 bg-white text-indigo-900 rounded-2xl font-black uppercase text-[10px] active:scale-95 transition-all ${state.userData.isPremium ? 'opacity-50' : ''}" ${state.userData.isPremium ? 'disabled' : ''}>
                                     ${state.userData.isPremium ? 'Premium Ativo' : 'Ativar por 14.99€'}
                                 </button>
@@ -411,8 +372,8 @@
             }
         }
 
-        // Iniciar Processo de Autenticação
-        startAuth();
+        // Iniciar Processo
+        authenticate();
     </script>
 </body>
 </html>
